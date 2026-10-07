@@ -254,7 +254,7 @@ public struct MacMonitorCleanupView: View {
         feature(.browse, title: "Browse your storage",
           detail: "Explore folders and mounted drives with measured sizes, scan progress and Finder shortcuts.")
         feature(.inventory, title: "Storage inventory",
-          detail: "See what uses space across applications, system data, documents and developer tools.")
+          detail: "See what uses space, identify app caches and select multiple caches to move to Trash.")
         feature(.files, title: "Large files & media",
           detail: "Review large files, check exact duplicates and export smaller media copies with FFmpeg.")
         feature(.recovery, title: "Revive your apps",
@@ -264,7 +264,7 @@ public struct MacMonitorCleanupView: View {
       }
       HStack(spacing: 7) {
         Image(systemName: "checkmark.shield").foregroundStyle(BlitzUI.mint)
-        Text("Every removal is reviewed. Personal-file removal uses Trash; eligible cache cleanup is permanent.")
+        Text("Every removal is reviewed. Inventory selections use Trash; eligible automatic cleanup is permanent.")
           .font(.system(size: 12)).foregroundStyle(BlitzUI.secondaryText)
       }.padding(.top, 4)
     }.padding(.horizontal, 24).padding(.top, 8).padding(.bottom, 24)

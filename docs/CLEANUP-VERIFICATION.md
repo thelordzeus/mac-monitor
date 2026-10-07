@@ -13,9 +13,12 @@ Run the fixture suite with `./scripts/test-cleanup.sh`. It exercises:
 - Docker/simulator cleanup through fake commands or injected drivers.
 - App recovery and force-quit reporting through injected drivers.
 - Exact duplicates, review persistence and corrupt-history preservation.
+- Inventory cache owner matching, exact bulk selections, cancellation and partial
+  failures; manual Trash cleanup, path boundaries, links, changed caches and
+  fresh running-app/open-file checks.
 
-The suite discovers 102 tests across 14 suites. With ffmpeg/ffprobe absent, three
-real-media export tests are explicitly skipped; the remaining 99 checks pass.
+The suite discovers 112 tests across 15 suites. With ffmpeg/ffprobe absent, three
+real-media export tests are explicitly skipped; the remaining 109 checks pass.
 Install those optional tools to exercise the media-export checks as well.
 
 Destructive fixture tests act on their own temporary files or mocked drivers.
@@ -35,6 +38,13 @@ ellipsis opens the app action menu, Escape and an outside click dismiss it,
 and activating the action closes the menu and opens the removal review.
 Cancel preserved the installed app. The shared Files & media dropdown also
 opened and dismissed correctly. No removal or media operation was executed.
+
+For 1.3.0, native Inventory checks confirmed per-cache checkboxes, installed app
+icons, the selected count/size footer, and Select All limited to the current
+search. Preparing two real cache rows kept the running app's cache and presented
+the closed app's exact cache path and measured size for confirmation. Cancel
+preserved both caches. The new fixture tests cover actual moves into a temporary
+fixture Trash; no real user cache was moved during native verification.
 
 Permission restrictions and changing processes/volumes remain practical limits.
 FFmpeg export was not verified end to end on this Mac; neither were destructive

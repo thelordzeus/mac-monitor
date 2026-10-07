@@ -37,14 +37,18 @@ Open **Cleanup** or press **⌘⇧K** for the integrated BlitzClean workspace. C
 | --- | --- |
 | **Cleanup** | Review old caches/reports, inactive dependencies with an exact reinstall lock, generated builds, simulators, Docker rebuildable storage and merged Git worktrees. |
 | **Browse** | Explore folders and mounted drives with measured sizes, scan progress and Finder shortcuts. |
-| **Inventory** | Inspect space used by applications, system data, documents and developer tools. |
+| **Inventory** | Inspect storage, identify caches by their app names/icons, select multiple caches and move them to Trash after review. |
 | **Files & media** | Review large files, verify exact duplicates and export smaller media copies while keeping originals. Export requires an existing `ffmpeg`/`ffprobe` installation. |
 | **Revive apps** | Check app health, try recovery, or choose normal quit and reviewed force quit. |
 | **AI & apps** | Inspect supported AI threads and app/process memory. |
 | **Projects** | Pause/resume or explicitly stop selected processes, save start commands and optionally enable pressure policies. Pausing a process still holds its RAM. |
 | **Setup** | Review optional Full Disk Access/Accessibility permissions and add project folders. |
 
-Opening a tool starts its scan; the landing page does not scan your disk. Removal requires review/confirmation, and the engines recheck file/process identity and activity. Personal-file removal uses Trash; eligible caches and developer artifacts are removed permanently after confirmation. Docker containers and volumes are preserved.
+Opening a tool starts its scan; the landing page does not scan your disk. Removal requires review/confirmation, and the engines recheck file/process identity and activity. Personal-file removal and manually selected Inventory caches use Trash. The Cleanup tool's eligible old caches and developer artifacts are removed permanently after confirmation. Docker containers and volumes are preserved.
+
+In **Inventory → Caches**, tick individual rows or select all caches matching your search. The footer shows the selected count and size. Choose **Move selected to Trash…**, review the exact paths, then confirm. Running apps, open files, links, changed caches and incomplete checks are kept with an explanation. Installed app icons are used where an owner can be identified; unrecognized/tool caches use a neutral icon. Empty Trash later to reclaim space.
+
+![Inventory cache list with associated app icons, multiple checked rows and a selected count/size action bar](artifacts/screenshots/inventory-caches.jpg)
 
 Scans can be incomplete because of permissions, changing volumes or scan budgets; the interface reports those limits. Scanned sizes differ from actual free-space gains. Dashboard image export shows the Cleanup tools overview; individual scan results remain in the interactive views.
 

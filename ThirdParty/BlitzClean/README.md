@@ -18,6 +18,9 @@ Local adaptations:
 - Mac Pulse colors, typography, rounded cards and tab navigation.
 - The Cleanup root hosts the shared dropdown overlay. Inventory app actions use
   a native macOS menu with the existing ellipsis appearance and review flow.
+- Inventory cache selection and owner icons are local additions. Manual bulk
+  cache removal uses Trash and rechecks location, ownership, activity and the
+  reviewed tree fingerprint; automatic cleanup's age rules remain unchanged.
 - The host collector supplies RAM, disk, CPU and pressure. The embedded monitor
   has no competing timer, collection or persistence.
 - Process monitoring starts when a relevant tool is opened. Notification defaults

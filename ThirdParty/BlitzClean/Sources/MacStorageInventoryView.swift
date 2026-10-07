@@ -3,11 +3,28 @@ import SwiftUI
 
 struct MacStorageInventoryView: View {
   @ObservedObject var model: StorageBreakdownModel
+  @ObservedObject private var caches: InventoryCacheModel
   let onBrowse: (String) -> Void
   @State private var query = ""
   @State private var showingAll: Set<String> = []
   @State private var pendingApp: StorageItem?
   @State private var status: Status?
+
+  init(model: StorageBreakdownModel, onBrowse: @escaping (String) -> Void) {
+    self.model = model
+    self.onBrowse = onBrowse
+    self.caches = model.inventoryCaches
+  }
+
+  private var selectionEnabled: Bool {
+    !caches.isBusy && caches.review.isEmpty && pendingApp == nil
+  }
+
+  private func refreshCacheOwners() {
+    guard let category = model.categories.first(where: { $0.id == "computer-user-caches" }) else { return }
+    let apps = model.categories.first(where: { $0.id == "computer-applications" })?.items ?? []
+    caches.update(items: category.items, catalog: .installed(apps))
+  }
 
   private struct Status {
     let text: String
@@ -43,6 +60,8 @@ struct MacStorageInventoryView: View {
             : sorted.filter {
               $0.name.localizedCaseInsensitiveContains(query)
                 || $0.path.localizedCaseInsensitiveContains(query)
+                || (category.id == "computer-user-caches"
+                  && caches.owners[$0.path]?.name.localizedCaseInsensitiveContains(query) == true)
             })
       }
       .filter { query.isEmpty || !$0.items.isEmpty }
@@ -59,7 +78,7 @@ struct MacStorageInventoryView: View {
             onBrowse(FileManager.default.homeDirectoryForCurrentUser.path)
           }.blitzButton(.quiet)
           Button("Scan Mac") { model.scan() }.blitzButton(.secondary)
-            .disabled(model.isScanning)
+            .disabled(model.isScanning || caches.isBusy || !caches.review.isEmpty)
         }
         HStack(spacing: 8) {
           if model.isScanning {
@@ -73,6 +92,9 @@ struct MacStorageInventoryView: View {
           }
         }.font(BlitzType.caption).foregroundStyle(BlitzUI.secondaryText)
         if let status { BlitzStatusLine(text: status.text, tone: status.tone) }
+        if let message = caches.status {
+          BlitzStatusLine(text: message, tone: caches.failures.isEmpty ? .muted : .warning)
+        }
         if sections.isEmpty && !model.isScanning {
           BlitzEmptyRow(
             text: query.isEmpty
@@ -88,7 +110,8 @@ struct MacStorageInventoryView: View {
         }
       }.padding(BlitzUI.pagePadding)
     }
-    .task { model.scanIfNeeded() }
+    .task { refreshCacheOwners(); model.scanIfNeeded() }
+    .onChange(of: model.categories) { _, _ in refreshCacheOwners() }
     .safeAreaInset(edge: .bottom, spacing: 0) {
       if let pendingApp {
         BlitzConfirmation(
@@ -101,6 +124,34 @@ struct MacStorageInventoryView: View {
             self.pendingApp = nil
             trash(app)
           }, onCancel: { self.pendingApp = nil })
+      } else if !caches.review.isEmpty {
+        BlitzConfirmation(
+          title: "Move \(caches.review.count) selected \(caches.review.count == 1 ? "cache" : "caches") to Trash?",
+          message: "\(ByteText.full(caches.reviewedBytes)) selected. Apps may download cached data again. Empty Trash to reclaim space.\n\n"
+            + caches.review.map { "\($0.owner.name) · \(abbreviated($0.id))" }.joined(separator: "\n"),
+          confirmTitle: "Move caches to Trash",
+          onConfirm: { caches.moveReviewed(history: model.overview, onCompletion: { model.scan() }) },
+          onCancel: { caches.cancelReview() })
+      } else if caches.isBusy || !caches.selected.isEmpty {
+        HStack(spacing: 12) {
+          if caches.isBusy {
+            ProgressView().controlSize(.small)
+            Text(caches.status ?? "Checking caches…").font(BlitzType.caption)
+            Spacer()
+            if caches.isPreparing {
+              Button("Cancel review") { caches.cancelPreparation() }.blitzButton(.quiet)
+            }
+          } else {
+            Text("\(caches.selected.count) \(caches.selected.count == 1 ? "cache" : "caches") selected · \(ByteText.full(caches.selectedBytes))")
+              .font(BlitzType.caption).monospacedDigit()
+            Spacer()
+            Button("Clear selection") { caches.selected = [] }.blitzButton(.quiet)
+            Button("Move selected to Trash…", role: .destructive) { caches.prepare() }
+              .blitzButton(.secondary)
+          }
+        }.padding(.horizontal, BlitzUI.pagePadding).padding(.vertical, 12)
+          .background(BlitzUI.panelBackground)
+          .overlay(alignment: .top) { Rectangle().fill(BlitzUI.separator).frame(height: 1) }
       }
     }
   }
@@ -111,13 +162,32 @@ struct MacStorageInventoryView: View {
       let displayed = expanded ? section.items : Array(section.items.prefix(6))
       BlitzStorageSection(
         title: section.category.name, symbol: section.category.systemImage,
-        detail: section.category.detail, trailing: ByteText.full(section.category.bytes),
+        detail: section.id == "computer-user-caches"
+          ? "Select caches to move to Trash; close their apps before removal"
+          : section.category.detail,
+        trailing: ByteText.full(section.category.bytes),
         showsContent: true
       ) {
         LazyVStack(spacing: 0) {
+          if section.id == "computer-user-caches" {
+            Toggle("Select all \(section.items.count) caches", isOn: Binding(
+              get: { !section.items.isEmpty && section.items.allSatisfy { caches.selected.contains($0.path) } },
+              set: { selected in
+                guard selectionEnabled else { return }
+                let paths = Set(section.items.map(\.path))
+                if selected { caches.selected.formUnion(paths) } else { caches.selected.subtract(paths) }
+              }))
+              .toggleStyle(BlitzCheckboxStyle()).font(BlitzType.caption)
+              .disabled(!selectionEnabled)
+              .help("Select all caches matching this search, including collapsed rows.")
+              .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 16).padding(.vertical, 6)
+            BlitzRowDivider(leading: 0)
+          }
           ForEach(displayed) { item in
             itemRow(.init(item: item, category: section.category))
-            if item.id != displayed.last?.id { BlitzRowDivider(leading: 54) }
+            if item.id != displayed.last?.id {
+              BlitzRowDivider(leading: section.id == "computer-user-caches" ? 100 : 54)
+            }
           }
           if query.isEmpty && section.items.count > 6 {
             BlitzRowDivider(leading: 0)
@@ -144,17 +214,38 @@ struct MacStorageInventoryView: View {
   private func itemRow(_ input: RowInput) -> some View {
     let item = input.item
     let category = input.category
+    let isCache = category.id == "computer-user-caches"
+    let owner = isCache ? caches.owners[item.path] : nil
     return HStack(spacing: 12) {
-      if category.id == "computer-applications" {
+      if isCache {
+        Toggle("Select cache for \(owner?.name ?? item.name)", isOn: Binding(
+          get: { caches.selected.contains(item.path) },
+          set: { selected in
+            guard selectionEnabled else { return }
+            if selected { caches.selected.insert(item.path) } else { caches.selected.remove(item.path) }
+          }))
+          .toggleStyle(BlitzCheckboxStyle(showsLabel: false)).disabled(!selectionEnabled)
+          .help("Select \(abbreviated(item.path))")
+        if let appPath = owner?.applicationPath {
+          ApplicationIcon(source: .file(appPath), size: 26, fallback: "app")
+        } else {
+          Image(systemName: owner?.fallbackSymbol ?? "shippingbox")
+            .frame(width: 26).foregroundStyle(BlitzUI.secondaryText).accessibilityHidden(true)
+        }
+      } else if category.id == "computer-applications" {
         ApplicationIcon(source: .file(item.path), size: 26, fallback: "app")
       } else {
         Image(systemName: category.id == "large-files" ? "doc" : "folder")
           .frame(width: 26).foregroundStyle(BlitzUI.secondaryText)
       }
       VStack(alignment: .leading, spacing: 3) {
-        Text(item.name).font(BlitzType.rowTitle).lineLimit(1)
-        Text(item.path).font(BlitzType.caption).foregroundStyle(BlitzUI.secondaryText)
+        Text(owner?.name ?? item.name).font(BlitzType.rowTitle).lineLimit(1)
+        Text(isCache ? abbreviated(item.path) : item.path).font(BlitzType.caption).foregroundStyle(BlitzUI.secondaryText)
           .lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+        if isCache, let failure = caches.failures[item.path] {
+          Text(failure).font(BlitzType.caption).foregroundStyle(BlitzUI.warning)
+            .fixedSize(horizontal: false, vertical: true)
+        }
       }.frame(maxWidth: .infinity, alignment: .leading)
       BlitzTrailingValue(value: ByteText.full(item.bytes), detail: nil)
       Button("Show in Finder") { Finder.reveal(item.path) }.blitzButton(.quiet)
@@ -169,11 +260,16 @@ struct MacStorageInventoryView: View {
             .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(BlitzUI.secondaryText)
             .frame(width: 34, height: 34).contentShape(Rectangle())
-        }.menuStyle(.borderlessButton).menuIndicator(.hidden)
+        }.menuStyle(.borderlessButton).menuIndicator(.hidden).disabled(!selectionEnabled)
           .fixedSize().accessibilityLabel("Actions for \(item.name)")
           .help("Actions for \(item.name)")
       }
     }.blitzRow()
+  }
+
+  private func abbreviated(_ path: String) -> String {
+    let home = FileManager.default.homeDirectoryForCurrentUser.path
+    return path.hasPrefix(home + "/") ? "~" + path.dropFirst(home.count) : path
   }
 
   private func canTrash(_ item: StorageItem) -> Bool {

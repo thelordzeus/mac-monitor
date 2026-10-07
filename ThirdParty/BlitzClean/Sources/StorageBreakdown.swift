@@ -75,6 +75,7 @@ final class StorageBreakdownModel: ObservableObject {
   @Published var cleanupFocus: StorageCleanupFocus?
   private static let automaticScanInterval: TimeInterval = 5 * 60
   let overview: CleanupOverviewModel
+  let inventoryCaches = InventoryCacheModel()
   lazy var repeats = RepeatCleanupModel(history: overview)
 
   @Published private(set) var categories: [StorageCategory] = []
