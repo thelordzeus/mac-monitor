@@ -61,9 +61,20 @@ final class Collector {
   private var interfaceType = "Network"
   private let gpuName = MTLCreateSystemDefaultDevice()?.name ?? "GPU"
 
-  func collect() -> Snapshot {
+  func resetBaselines() {
+    previousSystem = nil
+    previousProcesses.removeAll()
+    previousGPU.removeAll()
+    networkCounters.removeAll()
+    networkRates.removeAll()
+    networkTime = nil
+    idleTimes.removeAll()
+    iteration = 0
+  }
+  func collect(maxInterval: Double? = nil) -> Snapshot {
     let now = ProcessInfo.processInfo.systemUptime
     let dt = max(0.1, now - previousTime)
+    if let maxInterval, dt > maxInterval { resetBaselines() }
     let raw = mm_system()
     var s = Snapshot()
     s.date = Date()
@@ -73,6 +84,7 @@ final class Collector {
     s.performanceCores = sysInt("hw.perflevel0.logicalcpu")
     s.efficiencyCores = sysInt("hw.perflevel1.logicalcpu")
     if let old = previousSystem {
+      s.observedDuration = dt
       let user = delta(raw.user, old.user) + delta(raw.nice, old.nice)
       let system = delta(raw.system, old.system)
       let idle = delta(raw.idle, old.idle)
@@ -91,7 +103,7 @@ final class Collector {
     s.wired = Double(raw.wired)
     s.compressed = Double(raw.compressed)
     s.cached = Double(raw.cached)
-    s.free = max(0, s.totalMemory - s.memoryUsed)
+    s.free = Double(raw.free_memory)
     s.swap = Double(raw.swap)
     s.pressure = raw.pressure >= 4 ? "Critical" : raw.pressure >= 2 ? "Elevated" : "Normal"
     if let attrs = try? FileManager.default.attributesOfFileSystem(forPath: "/System/Volumes/Data")

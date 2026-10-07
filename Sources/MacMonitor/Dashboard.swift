@@ -67,7 +67,7 @@ struct DashboardView: View {
       Text(store.paused ? "Paused" : "Live · \(Int(store.interval))s refresh").font(
         .system(size: 10))
       Text(
-        "\(store.snapshot.processCount) processes · \(store.snapshot.gpuName) · Up \(Format.duration(store.snapshot.uptime))"
+        "\(store.snapshot.processCount) visible processes · \(store.snapshot.gpuName) · Up \(Format.duration(store.snapshot.uptime))"
       ).font(.system(size: 10)).foregroundStyle(Color.muted)
       Spacer()
       if store.selectedTab != .sound && store.selectedTab != .bluetooth
@@ -140,17 +140,18 @@ struct DashboardView: View {
             RingSlice(name: "App", value: s.appMemory, color: .cpuBlue),
             RingSlice(name: "Wired", value: s.wired, color: Color(hex: 0xe76529)),
             RingSlice(name: "Compressed", value: s.compressed, color: MonitorTab.network.color),
+            RingSlice(name: "Reserved", value: s.reservedMemory, color: Color(hex: 0x686879)),
             RingSlice(name: "Cached", value: s.cached, color: .gray),
             RingSlice(
-              name: "Free", value: max(0, s.totalMemory - s.memoryUsed - s.cached),
+              name: "Free", value: s.free,
               color: Color(hex: 0x313136)),
           ])
         BreakdownCard(
           title: "Memory by App", tab: .memory, center: Format.memory(appTotalMemory),
           subtitle: "all apps", slices: appSlices(power: false))
         BreakdownCard(
-          title: "Power by App", tab: .battery, center: Format.watts(appTotalPower),
-          subtitle: "all apps", slices: appSlices(power: true), bytes: false)
+          title: "CPU Power by App", tab: .battery, center: Format.watts(appTotalPower),
+          subtitle: "CPU energy", slices: appSlices(power: true), bytes: false)
       }
       if s.cpuTemperature != nil || s.gpuTemperature != nil || !s.fans.isEmpty {
         HStack(spacing: 24) {
@@ -260,7 +261,7 @@ struct DashboardView: View {
   }
   private func detailCards(_ tab: MonitorTab) -> [StatCardData] {
     let s = store.snapshot
-    let top = store.apps.first
+    let top = store.topApp(for: tab)
     let topCard = StatCardData(
       title: "Top App", symbol: "square.grid.2x2", value: top?.name ?? "—",
       subtitle: top.map { store.value($0, tab: tab) } ?? "", icon: top?.icon, app: top)
@@ -268,9 +269,9 @@ struct DashboardView: View {
     case .cpu:
       return [
         StatCardData(
-          title: "User", symbol: "cpu", value: Format.percent(s.user), subtitle: "Your apps"),
+          title: "User", symbol: "cpu", value: Format.percent(s.user), subtitle: "User mode"),
         StatCardData(
-          title: "System", symbol: "cpu", value: Format.percent(s.system), subtitle: "macOS"),
+          title: "System", symbol: "cpu", value: Format.percent(s.system), subtitle: "Kernel mode"),
         StatCardData(
           title: "Cores", symbol: "bolt", value: "\(s.cores)",
           subtitle: s.performanceCores > 0
@@ -313,10 +314,10 @@ struct DashboardView: View {
         StatCardData(
           title: "Memory", symbol: "memorychip", value: s.gpuMemory.map { Format.memory($0) } ?? "—"
         ),
-        StatCardData(title: "Average", symbol: "chart.bar", value: Format.percent(average(.gpu))),
+        StatCardData(title: "Average", symbol: "chart.bar", value: Summary.make(.gpu, store: store).facts[0].1),
         StatCardData(
-          title: "Peak", symbol: "bolt",
-          value: Format.percent(store.liveSamples.compactMap(\.gpu).max() ?? 0)), topCard,
+          title: Summary.make(.gpu, store: store).facts[1].0, symbol: "bolt",
+          value: Summary.make(.gpu, store: store).facts[1].1), topCard,
       ]
     case .battery:
       return [
@@ -332,10 +333,6 @@ struct DashboardView: View {
     default: return []
     }
   }
-  private func average(_ tab: MonitorTab) -> Double {
-    let values = store.chartSamples.map { $0.value(tab) }
-    return values.reduce(0, +) / Double(max(1, values.count))
-  }
   private func appTable(_ tab: MonitorTab) -> some View {
     VStack(spacing: 0) {
       HStack {
@@ -350,7 +347,7 @@ struct DashboardView: View {
         }
         Text(
           tab == .disk
-            ? "Writing" : tab == .network ? "Downloading" : tab == .battery ? "Power" : tab.rawValue
+            ? "Writing" : tab == .network ? "Downloading" : tab == .battery ? "CPU Power" : tab.rawValue
         ).foregroundStyle(Color.muted).frame(width: 115, alignment: .trailing)
       }.font(.system(size: 13)).padding(.horizontal, 15).padding(.top, 16).padding(.bottom, 10)
       if store.apps.isEmpty {
@@ -435,7 +432,7 @@ struct Summary {
   var value: String
   var unit: String
   var facts: [(String, String)]
-  static func make(_ tab: MonitorTab, store: MonitorStore) -> Summary {
+  static func make(_ tab: MonitorTab, store: MonitorStore, live: Bool = false) -> Summary {
     let s = store.snapshot
     func split(_ str: String) -> (String, String) {
       let parts = str.split(separator: " ")
@@ -449,7 +446,7 @@ struct Summary {
           (
             "Average today",
             Format.percent(
-              store.today.averageCPU > 0
+              store.today.observedDuration > 0
                 ? store.today.averageCPU
                 : store.liveSamples.map(\.cpu).reduce(0, +)
                   / Double(max(1, store.liveSamples.count)))
@@ -459,7 +456,7 @@ struct Summary {
       let v = split(Format.memory(s.memoryUsed))
       return Summary(
         caption: "In use of \(Format.memory(s.totalMemory,decimals:0))", value: v.0, unit: v.1,
-        facts: [("Free", Format.memory(s.free)), ("Swap", Format.memory(s.swap))])
+        facts: [("Available", Format.memory(s.availableMemory)), ("Swap", Format.memory(s.swap))])
     case .disk:
       let v = split(Format.bytes(s.diskFree))
       return Summary(
@@ -477,12 +474,12 @@ struct Summary {
           ("Last 30 days", Format.bytes(store.month.download + store.month.upload)),
         ])
     case .gpu:
-      let gpu = store.liveSamples.compactMap(\.gpu)
+      let gpu = (live ? store.liveSamples : store.chartSamples).compactMap(\.gpu)
       return Summary(
         caption: s.gpuName, value: s.gpu.map { String(format: "%.0f", $0) } ?? "—", unit: "%",
         facts: [
           ("Average", gpu.isEmpty ? "—" : Format.percent(gpu.reduce(0, +) / Double(gpu.count))),
-          ("Peak", gpu.max().map { Format.percent($0) } ?? "—"),
+          (live || store.historyRange == .live ? "Peak" : "Peak avg", gpu.max().map { Format.percent($0) } ?? "—"),
         ])
     case .battery:
       return Summary(
@@ -507,7 +504,7 @@ struct OverviewCard: View {
   @State private var hovered = false
   var body: some View {
     let s = store.snapshot
-    let summary = Summary.make(tab, store: store)
+    let summary = Summary.make(tab, store: store, live: true)
     return VStack(alignment: .leading, spacing: 13) {
       HStack {
         LabelBadge(title: tab.rawValue, symbol: tab.symbol, color: tab.color)
@@ -557,7 +554,7 @@ struct OverviewCard: View {
         ("User", Format.percent(s.user)), ("System", Format.percent(s.system)),
         (
           "Average Today",
-          Format.percent(store.today.averageCPU > 0 ? store.today.averageCPU : s.cpu)
+          Format.percent(store.today.observedDuration > 0 ? store.today.averageCPU : s.cpu)
         ),
       ]
     case .memory:
@@ -568,8 +565,8 @@ struct OverviewCard: View {
     case .gpu:
       return [
         ("Memory", s.gpuMemory.map { Format.memory($0) } ?? "—"),
-        ("Average", Summary.make(.gpu, store: store).facts[0].1),
-        ("Peak", Summary.make(.gpu, store: store).facts[1].1),
+        ("Average", Summary.make(.gpu, store: store, live: true).facts[0].1),
+        ("Peak", Summary.make(.gpu, store: store, live: true).facts[1].1),
       ]
     case .disk:
       return [

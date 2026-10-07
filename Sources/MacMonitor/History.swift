@@ -7,6 +7,7 @@ struct Totals {
   var upload = 0.0
   var written = 0.0
   var averageCPU = 0.0
+  var observedDuration = 0.0
 }
 final class HistoryStore {
   private var db: OpaquePointer?
@@ -59,6 +60,7 @@ final class HistoryStore {
     }
   }
   func append(_ s: Snapshot, duration: Double) {
+    guard duration > 0, duration.isFinite else { return }
     pending.append((s, duration))
     if lastSaved == .distantPast { lastSaved = s.date }
     if s.date.timeIntervalSince(lastSaved) >= 60 { flush() }
@@ -67,12 +69,14 @@ final class HistoryStore {
     guard !pending.isEmpty, db != nil else { return }
     let time = pending.last!.0.date.timeIntervalSince1970
     let duration = pending.reduce(0) { $0 + $1.1 }
-    let n = Double(pending.count)
     func average(_ key: KeyPath<Snapshot, Double>) -> Double {
       pending.reduce(0) { $0 + $1.0[keyPath: key] * $1.1 } / max(duration, 0.01)
     }
-    let gpu = pending.compactMap { $0.0.gpu }
-    let battery = pending.filter { $0.0.battery.present }.map { $0.0.battery.level }
+    func optionalAverage(_ value: (Snapshot) -> Double?) -> Double? {
+      let valid = pending.compactMap { s, dt in value(s).map { ($0, dt) } }
+      let weight = valid.reduce(0) { $0 + $1.1 }
+      return weight > 0 ? valid.reduce(0) { $0 + $1.0 * $1.1 } / weight : nil
+    }
     var statement: OpaquePointer?
     execute("BEGIN TRANSACTION")
     if sqlite3_prepare_v2(
@@ -81,9 +85,9 @@ final class HistoryStore {
     {
       let values: [Double?] = [
         time, duration, average(\.cpu), average(\.memoryUsed),
-        gpu.isEmpty ? nil : gpu.reduce(0, +) / Double(gpu.count), average(\.diskRead),
+        optionalAverage { $0.gpu }, average(\.diskRead),
         average(\.diskWrite), average(\.download), average(\.upload),
-        battery.isEmpty ? nil : battery.reduce(0, +) / Double(battery.count),
+        optionalAverage { $0.battery.present ? $0.battery.level : nil },
       ]
       for (i, v) in values.enumerated() {
         if let v {
@@ -96,12 +100,17 @@ final class HistoryStore {
     }
     sqlite3_finalize(statement)
     statement = nil
-    var averages: [String: (String, [Double])] = [:]
-    for (s, _) in pending {
+    var averages: [String: (name: String, sums: [Double], weights: [Double])] = [:]
+    for (s, dt) in pending {
       for a in s.apps {
-        var row = averages[a.id] ?? (a.name, Array(repeating: 0, count: 6))
-        let v = [a.cpu, a.memory, a.gpu ?? 0, a.write, a.download, a.power ?? 0]
-        for i in 0..<6 { row.1[i] += v[i] / n }
+        var row = averages[a.id] ?? (a.name, Array(repeating: 0, count: 6), Array(repeating: 0, count: 6))
+        let values: [Double?] = [a.cpu, a.memory, a.gpu, a.write, a.download, a.power]
+        for (i, value) in values.enumerated() {
+          if let value {
+            row.sums[i] += value * dt
+            row.weights[i] += dt
+          }
+        }
         averages[a.id] = row
       }
     }
@@ -115,8 +124,14 @@ final class HistoryStore {
         sqlite3_clear_bindings(statement)
         sqlite3_bind_double(statement, 1, time)
         sqlite3_bind_text(statement, 2, id, -1, transient)
-        sqlite3_bind_text(statement, 3, row.0, -1, transient)
-        for i in 0..<6 { sqlite3_bind_double(statement, Int32(i + 4), row.1[i]) }
+        sqlite3_bind_text(statement, 3, row.name, -1, transient)
+        for i in 0..<6 {
+          // Unknown GPU/energy readings stay NULL. Numeric app metrics include
+          // zero usage during intervals when that app was not running.
+          let weight = (i == 2 || i == 5) ? row.weights[i] : duration
+          if weight > 0 { sqlite3_bind_double(statement, Int32(i + 4), row.sums[i] / weight) }
+          else { sqlite3_bind_null(statement, Int32(i + 4)) }
+        }
         if sqlite3_step(statement) != SQLITE_DONE { error = String(cString: sqlite3_errmsg(db)) }
       }
     }
@@ -157,6 +172,7 @@ final class HistoryStore {
     while sqlite3_step(statement) == SQLITE_ROW {
       func d(_ i: Int32) -> Double { sqlite3_column_double(statement, i) }
       if appID != nil {
+        if sqlite3_column_type(statement, 1) == SQLITE_NULL { continue }
         var s = Sample(
           timestamp: d(0), cpu: 0, memory: 0, gpu: nil, diskRead: 0, diskWrite: 0, download: 0,
           upload: 0, battery: nil)
@@ -186,17 +202,19 @@ final class HistoryStore {
   }
   func totals(since: Date) -> Totals {
     var t = Totals()
+    var cpuIntegral = 0.0
     var stmt: OpaquePointer?
     if sqlite3_prepare_v2(
       db,
-      "SELECT SUM(download*duration),SUM(upload*duration),SUM(diskWrite*duration),SUM(cpu*duration)/SUM(duration) FROM samples WHERE time>=?",
+      "SELECT SUM(download*duration),SUM(upload*duration),SUM(diskWrite*duration),SUM(cpu*duration),SUM(duration) FROM samples WHERE time>=?",
       -1, &stmt, nil) == SQLITE_OK
     {
       sqlite3_bind_double(stmt, 1, since.timeIntervalSince1970)
       if sqlite3_step(stmt) == SQLITE_ROW {
         t = Totals(
           download: sqlite3_column_double(stmt, 0), upload: sqlite3_column_double(stmt, 1),
-          written: sqlite3_column_double(stmt, 2), averageCPU: sqlite3_column_double(stmt, 3))
+          written: sqlite3_column_double(stmt, 2), observedDuration: sqlite3_column_double(stmt, 4))
+        cpuIntegral = sqlite3_column_double(stmt, 3)
       }
     }
     sqlite3_finalize(stmt)
@@ -204,7 +222,10 @@ final class HistoryStore {
       t.download += s.download * dt
       t.upload += s.upload * dt
       t.written += s.diskWrite * dt
+      cpuIntegral += s.cpu * dt
+      t.observedDuration += dt
     }
+    t.averageCPU = t.observedDuration > 0 ? cpuIntegral / t.observedDuration : 0
     return t
   }
 }

@@ -20,7 +20,11 @@ final class MonitorStore: ObservableObject {
   @Published var showSystem = UserDefaults.standard.bool(forKey: "showSystem") {
     didSet { UserDefaults.standard.set(showSystem, forKey: "showSystem") }
   }
-  @Published var paused = false
+  @Published var paused = false {
+    didSet {
+      if oldValue != paused { queue.async { self.collector.resetBaselines() } }
+    }
+  }
   @Published var selectedApp: AppStat?
   @Published var appHistory: [Sample] = []
   @Published var settingsVisible = false
@@ -64,7 +68,6 @@ final class MonitorStore: ObservableObject {
   private var history: HistoryStore?
   private var timer: Timer?
   private var inFlight = false
-  private var lastDate: Date?
   private var triggerTimes: [String: Date] = [:]
   private var lastAlert: [String: Date] = [:]
   private var memoryBaseline: [String: (Date, Double)] = [:]
@@ -81,6 +84,18 @@ final class MonitorStore: ObservableObject {
       let p1 = pinnedApps.contains($1.id)
       if p0 != p1 { return p0 }
       return $0.value(for: selectedTab) > $1.value(for: selectedTab)
+    }
+  }
+  func topApp(for tab: MonitorTab) -> AppStat? {
+    snapshot.apps.filter { !$0.isSystem }.max { $0.value(for: tab) < $1.value(for: tab) }
+  }
+  var displayedAppHistory: [Sample] {
+    let tab = selectedTab == .overview ? MonitorTab.memory : selectedTab
+    guard tab == .cpu else { return appHistory }
+    return appHistory.map { point in
+      var point = point
+      point.cpu = normalizedCPU(point.cpu)
+      return point
     }
   }
   init(start: Bool = true) {
@@ -133,10 +148,8 @@ final class MonitorStore: ObservableObject {
     guard !paused, !inFlight else { return }
     inFlight = true
     queue.async {
-      let s = self.collector.collect()
-      let elapsed = self.lastDate.map { s.date.timeIntervalSince($0) } ?? 0
-      self.history?.append(s, duration: min(10, max(0, elapsed)))
-      self.lastDate = s.date
+      let s = self.collector.collect(maxInterval: max(10, self.interval * 3))
+      self.history?.append(s, duration: s.observedDuration)
       let day = Calendar.current.startOfDay(for: s.date)
       let t = self.history?.totals(since: day) ?? Totals()
       let w = self.history?.totals(since: s.date.addingTimeInterval(-604800)) ?? Totals()
@@ -147,7 +160,7 @@ final class MonitorStore: ObservableObject {
         self.week = w
         self.month = m
         self.inFlight = false
-        self.liveSamples.append(s.sample)
+        if s.observedDuration > 0 { self.liveSamples.append(s.sample) }
         self.liveSamples.removeAll { $0.timestamp < s.date.timeIntervalSince1970 - 120 }
         if let selected = self.selectedApp,
           let updated = s.apps.first(where: { $0.id == selected.id })

@@ -209,6 +209,7 @@ struct Sample: Codable, Identifiable {
 }
 struct Snapshot {
   var date = Date()
+  var observedDuration = 0.0
   var cpu = 0.0
   var user = 0.0
   var system = 0.0
@@ -245,7 +246,13 @@ struct Snapshot {
   var processCount = 0
   var networkAvailable = false
   var uptime = ProcessInfo.processInfo.systemUptime
-  var memoryUsed: Double { min(totalMemory, appMemory + wired + compressed) }
+  // Apple Silicon reserves RAM outside the VM page buckets. Include it in
+  // usage rather than treating that memory as available to applications.
+  var reservedMemory: Double {
+    max(0, totalMemory - appMemory - wired - compressed - cached - free)
+  }
+  var memoryUsed: Double { max(0, totalMemory - cached - free) }
+  var availableMemory: Double { max(0, totalMemory - memoryUsed) }
   var sample: Sample {
     Sample(
       timestamp: date.timeIntervalSince1970, cpu: cpu, memory: memoryUsed, gpu: gpu,

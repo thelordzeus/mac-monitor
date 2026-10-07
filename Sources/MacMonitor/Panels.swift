@@ -390,8 +390,9 @@ struct AppDetailView: View {
           ).foregroundStyle(Color.muted)
         }
         HistoryChart(
-          samples: store.appHistory,
-          tab: store.selectedTab == .overview ? .memory : store.selectedTab
+          samples: store.displayedAppHistory,
+          tab: store.selectedTab == .overview ? .memory : store.selectedTab,
+          appPower: store.selectedTab == .battery
         ).frame(height: 115)
       }.padding(14).background(Color.surface, in: RoundedRectangle(cornerRadius: 14))
       HStack {
@@ -409,7 +410,7 @@ struct AppDetailView: View {
               Text(p.name).font(.system(size: 12)).lineLimit(1).help(p.path)
               Spacer()
               Text("\(p.pid)").frame(width: 65, alignment: .trailing)
-              Text(Format.percent(p.cpu, precise: true)).frame(width: 70, alignment: .trailing)
+              Text(Format.percent(store.normalizedCPU(p.cpu), precise: true)).frame(width: 70, alignment: .trailing)
               Text(p.accessible ? Format.memory(p.memory) : "Restricted").frame(
                 width: 100, alignment: .trailing)
               Button {

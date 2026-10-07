@@ -5,13 +5,21 @@ struct HistoryChart: View {
   var tab: MonitorTab
   var maximum: Double? = nil
   var bars = false
+  var appPower = false
   @State private var hoverX: CGFloat?
-  var values: [Double] { samples.map { $0.value(tab) } }
+  var dataPoints: [Sample] {
+    samples.filter { point in
+      if tab == .gpu { return point.gpu != nil }
+      if tab == .battery { return point.battery != nil }
+      return true
+    }
+  }
+  var values: [Double] { dataPoints.map { $0.value(tab) } }
   var body: some View {
     GeometryReader { geometry in
       let size = geometry.size
       let maxValue = max(1, maximum ?? ((values.max() ?? 1) * 1.12))
-      let times = samples.map(\.timestamp)
+      let times = dataPoints.map(\.timestamp)
       let start = times.first ?? 0
       let span = max(1, (times.last ?? 0) - start)
       Canvas { context, canvas in
@@ -90,33 +98,34 @@ struct HistoryChart: View {
         case .ended: hoverX = nil
         }
       }
-      if samples.isEmpty {
+      if dataPoints.isEmpty {
         Text("History appears as your Mac is monitored").font(.system(size: 12)).foregroundStyle(
           Color.muted
         ).frame(maxWidth: .infinity, maxHeight: .infinity)
       }
-      if !bars, let x = hoverX, let index = nearest(x, width: size.width), index < samples.count {
+      if !bars, let x = hoverX, let index = nearest(x, width: size.width), index < dataPoints.count {
         VStack(alignment: .leading, spacing: 3) {
           Text(display(values[index])).font(.system(size: 12, weight: .semibold)).foregroundStyle(
             .white)
           Text(
-            Date(timeIntervalSince1970: samples[index].timestamp).formatted(
+            Date(timeIntervalSince1970: dataPoints[index].timestamp).formatted(
               date: .abbreviated, time: .standard)
           ).font(.system(size: 10)).foregroundStyle(Color.muted)
         }.padding(8).background(Color.window, in: RoundedRectangle(cornerRadius: 8)).position(
           x: min(max(x, 85), size.width - 85), y: 22)
       }
     }
-    .accessibilityLabel("\(tab.rawValue) history chart, \(samples.count) samples")
+    .accessibilityLabel("\(tab.rawValue) history chart, \(dataPoints.count) samples")
   }
   private func nearest(_ x: CGFloat, width: CGFloat) -> Int? {
-    guard !samples.isEmpty else { return nil }
-    return min(samples.count - 1, max(0, Int(x / max(1, width) * CGFloat(samples.count - 1))))
+    guard !dataPoints.isEmpty else { return nil }
+    return min(dataPoints.count - 1, max(0, Int(x / max(1, width) * CGFloat(dataPoints.count - 1))))
   }
   private func display(_ value: Double) -> String {
     switch tab {
     case .memory: return Format.memory(value)
     case .disk, .network: return Format.rate(value)
+    case .battery where appPower: return Format.watts(value)
     default: return Format.percent(value, precise: true)
     }
   }
@@ -152,7 +161,7 @@ struct BreakdownCard: View {
             Text(subtitle).font(.system(size: 10)).foregroundStyle(Color.muted)
           }.padding(8)
         }.frame(width: 96, height: 96)
-        VStack(spacing: 9) {
+        VStack(spacing: slices.count > 5 ? 5 : 9) {
           ForEach(Array(slices.enumerated()), id: \.offset) { _, slice in
             HStack(spacing: 6) {
               Circle().fill(slice.color).frame(width: 6, height: 6)

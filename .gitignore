@@ -2,3 +2,7 @@
 dist/
 .DS_Store
 *.xcuserstate
+
+# Local machine audit data is not published.
+artifacts/metrics-audit.json
+artifacts/local/

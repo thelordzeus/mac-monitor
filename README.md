@@ -8,7 +8,11 @@ Built with SwiftUI, AppKit, C and Objective-C. All readings come from the Mac. N
 
 ## Download and install
 
-Download **Mac-Monitor-arm64.dmg** from this repository's **Releases** page. The ZIP contains the same app if you prefer a ZIP download. The release also includes `SHA256SUMS` for checking downloaded files.
+**[Download for Mac — DMG](https://github.com/thelordzeus/mac-monitor/releases/latest/download/Mac-Monitor-arm64.dmg)**
+
+[ZIP download](https://github.com/thelordzeus/mac-monitor/releases/latest/download/Mac-Monitor-arm64.zip) · [Release notes](https://github.com/thelordzeus/mac-monitor/releases/latest) · [SHA256 checksums](https://github.com/thelordzeus/mac-monitor/releases/latest/download/SHA256SUMS)
+
+The DMG and ZIP contain the same app. The release includes `SHA256SUMS` for checking downloaded files.
 
 **Requirements:** an Apple Silicon Mac (M1 or later) running **macOS 14.2 or newer**. The published binary is `arm64`. Intel users can try building from source on an Intel Mac; that configuration has not been tested.
 
@@ -27,7 +31,7 @@ To verify a download, run `shasum -a 256 Mac-Monitor-arm64.dmg` and compare its 
 | --- | --- |
 | **Overview** | Six live metric cards, recent bar charts, memory breakdowns, app memory and app CPU energy. CPU/GPU temperatures, fan speeds and thermal state appear when available. |
 | **CPU** | Total, user and system usage, load average, core count, app rankings and individual processes. |
-| **Memory** | App, wired, compressed, cached, free and swap memory, memory pressure and grouped app footprints. |
+| **Memory** | App, wired, compressed, reserved, cached, free and swap memory, available memory, pressure and grouped app footprints. |
 | **Disk** | Free/used capacity, mounted volumes, physical read/write rates and app writes. |
 | **Network** | Download/upload rates, current interface, app traffic and totals observed while monitoring. |
 | **GPU** | Driver utilization, graphics memory, app GPU time, recent average and peak. |
@@ -47,7 +51,7 @@ Beyond the tabs:
 
 ## Screenshots
 
-The images show actual readings from an Apple M4 desktop Mac. The Battery tab correctly reports no internal battery; Bluetooth discovery is shown before the user enables it. Supported readings will differ on your Mac.
+The images show actual readings from an Apple M4 desktop Mac; screenshot totals use saved local history. The Battery tab correctly reports no internal battery; Bluetooth discovery is shown before the user enables it. Supported readings will differ on your Mac.
 
 | CPU | Memory |
 | --- | --- |
@@ -116,6 +120,8 @@ Click a metric card or a top tab for detail. Click an app row for its processes 
 Clone this repository, then run these commands from its root:
 
 ```sh
+git clone https://github.com/thelordzeus/mac-monitor.git
+cd mac-monitor
 ./scripts/build.sh
 ./scripts/run.sh
 ```
@@ -140,6 +146,7 @@ History is stored in `~/Library/Application Support/MacMonitor/history.sqlite`. 
 
 - App CPU is normalized across the Mac by default; settings can switch to percentages of one core.
 - App memory uses physical footprint when available. Shared memory means summed app footprints can differ from system memory. RAM uses binary units; disk capacity and network traffic use decimal units.
+- Memory Used includes system-reserved RAM and excludes free pages and reclaimable cache. Available includes both free RAM and cache. The breakdown keeps these categories separate.
 - App GPU time comes from driver counters. Overlapping work can exceed 100%.
 - App power is macOS-reported **CPU energy**, rather than whole-system power. Battery watts come from current and voltage; values while on AC can be zero.
 - Network totals cover observed periods. System counters use physical `en*` and cellular interfaces. App network counters refresh roughly every ten seconds through `nettop` and can be restricted by macOS.
@@ -156,10 +163,11 @@ The build and core statistics/history checks were validated on an Apple M4 Mac. 
 ```sh
 "dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --self-test
 "dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --diagnostics
+python3 scripts/verify-metrics.py
 "dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --render artifacts/screenshots
 ```
 
-The self-test checks a controlled single-core CPU workload, live metric bounds, PID grouping, stale-PID protection, SQLite persistence, app history, observed-byte integration and formatting. `--render` produces all ten screenshots from real Mac readings; it does not inject simulated statistics.
+The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. `--render` produces all ten screenshots from real Mac readings; it does not inject simulated statistics.
 
 ## Design reference
 

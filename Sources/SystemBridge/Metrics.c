@@ -85,7 +85,9 @@ MMSystem mm_system(void) {
         s.wired = vm.wire_count * (uint64_t)page;
         s.compressed = vm.compressor_page_count * (uint64_t)page;
         s.cached = (vm.purgeable_count + vm.external_page_count) * (uint64_t)page;
-        s.free_memory = (vm.free_count + vm.speculative_count) * (uint64_t)page;
+        // free_count already includes speculative pages, which also belong to
+        // the file-backed cache. Keep the free and cached buckets disjoint.
+        s.free_memory = (vm.free_count > vm.speculative_count ? vm.free_count - vm.speculative_count : 0) * (uint64_t)page;
         s.app_memory = (vm.internal_page_count > vm.purgeable_count ? vm.internal_page_count - vm.purgeable_count : 0) * (uint64_t)page;
     }
     struct xsw_usage swap; size = sizeof(swap);
