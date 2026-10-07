@@ -156,6 +156,7 @@ public struct MacMonitorCleanupView: View {
       }.padding(.horizontal, 24).padding(.bottom, 8)
       content.frame(maxWidth: .infinity, maxHeight: .infinity)
     }.background(BlitzUI.canvasBackground).tint(BlitzUI.mint)
+      .blitzDropdownHost()
       .onChange(of: workspace.navigation.storagePage) { _, page in
         guard [.cleanup, .browse, .inventory].contains(workspace.section) else { return }
         workspace.section = page == .cleanup ? .cleanup : page == .mac ? .inventory : .browse

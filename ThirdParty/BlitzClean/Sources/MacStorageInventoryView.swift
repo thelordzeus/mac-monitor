@@ -162,9 +162,16 @@ struct MacStorageInventoryView: View {
       if !item.path.hasSuffix(".app"), DirectoryCheck.isDirectory(item.path) {
         Button("Browse") { onBrowse(item.path) }.blitzButton(.secondary).controlSize(.small)
       } else if category.id == "computer-applications", canTrash(item) {
-        BlitzActionMenu(label: "Actions for \(item.name)") {
+        Menu {
           Button("Move app to Trash…", role: .destructive) { pendingApp = item }
-        }
+        } label: {
+          Image(systemName: "ellipsis")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(BlitzUI.secondaryText)
+            .frame(width: 34, height: 34).contentShape(Rectangle())
+        }.menuStyle(.borderlessButton).menuIndicator(.hidden)
+          .fixedSize().accessibilityLabel("Actions for \(item.name)")
+          .help("Actions for \(item.name)")
       }
     }.blitzRow()
   }

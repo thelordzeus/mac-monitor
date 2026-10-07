@@ -30,6 +30,12 @@ with strict code-signature verification, and the DMG is verified by hdiutil.
 Dashboard PNG exports were rendered from real readings and visually checked for
 the monitoring tab bar and complete Cleanup landing-page content.
 
+For the 1.2.1 menu regression, native UI checks confirmed that Inventory's
+ellipsis opens the app action menu, Escape and an outside click dismiss it,
+and activating the action closes the menu and opens the removal review.
+Cancel preserved the installed app. The shared Files & media dropdown also
+opened and dismissed correctly. No removal or media operation was executed.
+
 Permission restrictions and changing processes/volumes remain practical limits.
 FFmpeg export was not verified end to end on this Mac; neither were destructive
 operations against the user's installed apps or development environments.
