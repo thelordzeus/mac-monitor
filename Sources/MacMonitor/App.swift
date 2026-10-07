@@ -7,7 +7,7 @@ struct MacMonitorApp: App {
   @NSApplicationDelegateAdaptor(MonitorAppDelegate.self) private var delegate
   @StateObject private var store = MonitorStore()
   var body: some Scene {
-    WindowGroup("Mac Monitor", id: "dashboard") {
+    WindowGroup(AppIdentity.name, id: "dashboard") {
       DashboardRoot(store: store, delegate: delegate)
     }.defaultSize(width: 1260, height: 890).windowStyle(.hiddenTitleBar)
       .commands {
@@ -45,7 +45,7 @@ struct WindowSetup: NSViewRepresentable {
     let view = NSView()
     DispatchQueue.main.async {
       if let window = view.window {
-        window.title = "Mac Monitor"
+        window.title = AppIdentity.name
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         for button in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
@@ -118,7 +118,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
     }
     item?.button?.image = NSImage(
       systemSymbolName: s.pressure == "Critical" ? "exclamationmark.triangle" : "waveform.path.ecg",
-      accessibilityDescription: "Mac Monitor")
+      accessibilityDescription: AppIdentity.name)
     item?.button?.imagePosition = .imageLeft
     item?.button?.title = parts.isEmpty ? "" : " " + parts.joined(separator: "  ")
     item?.button?.font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .regular)
@@ -165,7 +165,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
   private func openWindow() {
     popover.performClose(nil)
     NSApp.activate(ignoringOtherApps: true)
-    if let window = NSApp.windows.first(where: { $0.title == "Mac Monitor" }) {
+    if let window = NSApp.windows.first(where: { $0.title == AppIdentity.name }) {
       window.makeKeyAndOrderFront(nil)
     } else {
       showWindow?()
@@ -178,7 +178,7 @@ struct MenuDashboard: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
       HStack {
-        Label("Mac Monitor", systemImage: "waveform.path.ecg").font(
+        Label(AppIdentity.name, systemImage: "waveform.path.ecg").font(
           .system(size: 15, weight: .semibold))
         Spacer()
         Text("Up \(Format.duration(store.snapshot.uptime))").font(.system(size: 10))

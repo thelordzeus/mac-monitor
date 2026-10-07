@@ -58,6 +58,7 @@ final class AudioController: ObservableObject {
       var address = property(kAudioDevicePropertyStreams, scope: kAudioDevicePropertyScopeOutput)
       var bytes: UInt32 = 0
       guard AudioObjectGetPropertyDataSize(id, &address, 0, nil, &bytes) == noErr, bytes > 0,
+        string(id, kAudioObjectPropertyName)?.contains("Mac Pulse") != true,
         string(id, kAudioObjectPropertyName)?.contains("Mac Monitor") != true
       else { return nil }
       return AudioDevice(id: id, name: string(id, kAudioObjectPropertyName) ?? "Output")
@@ -180,7 +181,7 @@ final class AudioController: ObservableObject {
       gains[app.id] = gain
     } else {
       error =
-        "Audio mixing could not start (\(status)). Allow Mac Monitor in System Settings → Privacy & Security → Screen & System Audio Recording, then relaunch."
+        "Audio mixing could not start (\(status)). Allow \(AppIdentity.name) in System Settings → Privacy & Security → Screen & System Audio Recording, then relaunch."
     }
   }
   func reset() {

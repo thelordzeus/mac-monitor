@@ -265,7 +265,7 @@ final class MonitorStore: ObservableObject {
         if !granted {
           self.message =
             error?.localizedDescription
-            ?? "Enable notifications for Mac Monitor in System Settings."
+            ?? "Enable notifications for \(AppIdentity.name) in System Settings."
         }
       }
     }
@@ -322,7 +322,7 @@ final class MonitorStore: ObservableObject {
   func exportCSV() {
     let panel = NSSavePanel()
     panel.nameFieldStringValue =
-      "Mac-Monitor-\(Date().formatted(.iso8601.year().month().day())) .csv".replacingOccurrences(
+      "\(AppIdentity.exportName)-\(Date().formatted(.iso8601.year().month().day())) .csv".replacingOccurrences(
         of: " .", with: ".")
     panel.allowedContentTypes = [.commaSeparatedText]
     guard panel.runModal() == .OK, let url = panel.url else { return }

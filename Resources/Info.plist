@@ -2,17 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>CFBundleIdentifier</key><string>local.macmonitor.app</string>
-  <key>CFBundleName</key><string>Mac Monitor</string>
-  <key>CFBundleDisplayName</key><string>Mac Monitor</string>
+  <key>CFBundleName</key><string>Mac Pulse</string>
+  <key>CFBundleDisplayName</key><string>Mac Pulse</string>
   <key>CFBundleExecutable</key><string>MacMonitor</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.1.0</string>
-  <key>CFBundleVersion</key><string>3</string>
+  <key>CFBundleShortVersionString</key><string>1.2.0</string>
+  <key>CFBundleVersion</key><string>4</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>LSMinimumSystemVersion</key><string>14.2</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSSupportsAutomaticTermination</key><false/>
-  <key>NSAudioCaptureUsageDescription</key><string>Mac Monitor processes audio locally to let you change each app's volume. Audio is never recorded or transmitted.</string>
-  <key>NSBluetoothAlwaysUsageDescription</key><string>Mac Monitor reads connected Bluetooth devices and their battery levels when you open the Bluetooth panel.</string>
+  <key>NSAudioCaptureUsageDescription</key><string>Mac Pulse processes audio locally to let you change each app's volume. Audio is never recorded or transmitted.</string>
+  <key>NSBluetoothAlwaysUsageDescription</key><string>Mac Pulse reads connected Bluetooth devices and their battery levels when you open the Bluetooth panel.</string>
   <key>NSPrincipalClass</key><string>NSApplication</string>
 </dict></plist>

@@ -2,7 +2,7 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// Values supplied by Mac Monitor's collector. Cleanup does not run a second stats timer.
+/// Values supplied by Mac Pulse's collector. Cleanup does not run a second stats timer.
 public struct CleanupMetrics {
   public var diskAvailable: Double
   public var diskTotal: Double

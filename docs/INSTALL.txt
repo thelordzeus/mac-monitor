@@ -1,12 +1,15 @@
-Mac Monitor 1.1.0
+Mac Pulse 1.2.0
 
 Requirements
 Apple Silicon Mac (M1 or later), macOS 14.2 or later.
 
 Install
-1. Drag Mac Monitor.app to the Applications folder beside it.
+1. Drag Mac Pulse.app to the Applications folder beside it.
 2. Eject this disk image.
-3. Open Mac Monitor from Applications.
+3. Open Mac Pulse from Applications.
+
+Previously called Mac Monitor. Quit Mac Monitor before opening Mac Pulse.
+Your existing history, settings and Cleanup state are retained.
 
 This community build is signed locally (ad hoc), rather than with a Developer
 ID certificate, and is not notarized by Apple. If macOS blocks the first launch,

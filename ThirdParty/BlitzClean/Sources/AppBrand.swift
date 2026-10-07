@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum AppBrand {
-  static let name = "Mac Monitor"
+  static let name = "Mac Pulse"
   static var version: String {
     Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
       ?? "Development"

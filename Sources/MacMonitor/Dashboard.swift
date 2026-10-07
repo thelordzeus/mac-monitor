@@ -24,7 +24,7 @@ import SwiftUI
       .sheet(item: $store.selectedApp) { app in AppDetailView(store: store, app: app) }
       .sheet(isPresented: $store.alertsVisible) { AlertsView(store: store) }
       .alert(
-        "Mac Monitor",
+        AppIdentity.name,
         isPresented: Binding(get: { store.message != nil }, set: { if !$0 { store.message = nil } })
       ) {
         Button("OK") { store.message = nil }
@@ -419,7 +419,7 @@ import SwiftUI
       return
     }
     let panel = NSSavePanel()
-    panel.nameFieldStringValue = "Mac-Monitor.png"
+    panel.nameFieldStringValue = "\(AppIdentity.exportName).png"
     panel.allowedContentTypes = [.png]
     if panel.runModal() == .OK, let url = panel.url {
       do { try png.write(to: url) } catch { store.message = error.localizedDescription }

@@ -53,7 +53,7 @@ App network counters refresh roughly every ten seconds; short-lived connections 
 
 ```sh
 ./scripts/build.sh
-"dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --self-test
+"dist/Mac Pulse.app/Contents/MacOS/MacMonitor" --self-test
 python3 scripts/verify-metrics.py
 ```
 

@@ -24,7 +24,7 @@ performed during verification. Read-only native UI checks cover the landing
 page, cache review, folder browser, file review, inventory, recovery, AI/app
 controls, project controls and setup.
 
-Mac Monitor's existing `--self-test` verifies CPU/RAM/network/disk collection and
+Mac Pulse's existing `--self-test` verifies CPU/RAM/network/disk collection and
 history behavior. The release app and clean package staging bundles are checked
 with strict code-signature verification, and the DMG is verified by hdiutil.
 Dashboard PNG exports were rendered from real readings and visually checked for

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Isolated Mac Monitor cleanup data; never migrates another application’s files.
+/// Isolated host cleanup data; retains the original storage path across the Mac Pulse rename.
 enum AppData {
   static var directory: URL {
     FileManager.default.homeDirectoryForCurrentUser

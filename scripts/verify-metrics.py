@@ -16,7 +16,9 @@ import sys
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-APP = ROOT / "dist/Mac Monitor.app/Contents/MacOS/MacMonitor"
+with (ROOT / "Resources/Info.plist").open("rb") as app_info:
+    APP_INFO = plistlib.load(app_info)
+APP = ROOT / "dist" / (APP_INFO["CFBundleDisplayName"] + ".app") / "Contents/MacOS" / APP_INFO["CFBundleExecutable"]
 MIB = 1024 ** 2
 results = []
 

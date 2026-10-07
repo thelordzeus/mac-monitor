@@ -167,7 +167,7 @@ enum MediaExportEngine {
       try ReviewFileDeletion.validateIdentity(.init(file: file, roots: request.roots))
     }
     let final = destination.appendingPathComponent(
-      "MacMonitor-\(UUID().uuidString.prefix(8)).\(ext)")
+      "Mac-Pulse-\(UUID().uuidString.prefix(8)).\(ext)")
     try FileManager.default.moveItem(at: output, to: final)
     let size =
       (try FileManager.default.attributesOfItem(atPath: final.path)[.size] as? NSNumber)?.int64Value

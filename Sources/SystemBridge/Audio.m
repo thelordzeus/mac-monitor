@@ -74,10 +74,10 @@ MMMixer mm_mixer_create(const uint32_t *objects, int count, float gain, int *err
         processes = [NSMutableArray array];
         for (int i = 0; i < count; i++) [processes addObject:@(objects[i])];
         desc = [[CATapDescription alloc] initWithProcesses:processes andDeviceUID:outputUID withStream:0];
-        desc.name = @"Mac Monitor app mixer"; desc.privateTap = YES; desc.muteBehavior = CATapMutedWhenTapped;
+        desc.name = @"Mac Pulse app mixer"; desc.privateTap = YES; desc.muteBehavior = CATapMutedWhenTapped;
         status = AudioHardwareCreateProcessTap(desc, &m->tap); if (status) goto fail;
         aggregate = @{
-            @kAudioAggregateDeviceNameKey: @"Mac Monitor Private Mixer",
+            @kAudioAggregateDeviceNameKey: @"Mac Pulse Private Mixer",
             @kAudioAggregateDeviceUIDKey: [NSUUID UUID].UUIDString,
             @kAudioAggregateDeviceIsPrivateKey: @YES,
             @kAudioAggregateDeviceMainSubDeviceKey: outputUID,

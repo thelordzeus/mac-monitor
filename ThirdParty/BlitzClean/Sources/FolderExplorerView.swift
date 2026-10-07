@@ -113,10 +113,10 @@ struct FolderExplorerView: View {
       HStack(spacing: 8) {
         Button("Back", systemImage: "chevron.left") { model.goBack() }
           .blitzButton(.quiet).disabled(model.backPaths.isEmpty)
-          .help("Return to the previous folder in Mac Monitor")
+          .help("Return to the previous folder in \(AppBrand.name)")
         if !model.forwardPaths.isEmpty {
           Button("Forward", systemImage: "chevron.right") { model.goForward() }
-            .blitzButton(.quiet).help("Return to the next folder in Mac Monitor")
+            .blitzButton(.quiet).help("Return to the next folder in \(AppBrand.name)")
         }
         ScrollView(.horizontal, showsIndicators: false) {
           HStack(spacing: 2) {
@@ -127,7 +127,7 @@ struct FolderExplorerView: View {
               }
               Button(crumb.title) { model.open(crumb.path) }
                 .blitzButton(.quiet).controlSize(.small).fixedSize()
-                .help("Open \(crumb.title) in Mac Monitor")
+                .help("Open \(crumb.title) in \(AppBrand.name)")
             }
           }
         }

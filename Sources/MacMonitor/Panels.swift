@@ -500,7 +500,7 @@ struct SettingsView: View {
             Toggle("Show network speeds in bits per second", isOn: $store.networkBits)
             Toggle("Use Fahrenheit for temperatures", isOn: $store.fahrenheit)
             Toggle("Send notifications for unusual app activity", isOn: $store.notifications)
-            Toggle("Open Mac Monitor at login", isOn: $login).onChange(of: login) { _, enabled in
+            Toggle("Open \(AppIdentity.name) at login", isOn: $login).onChange(of: login) { _, enabled in
               do {
                 if enabled {
                   try SMAppService.mainApp.register()
@@ -523,7 +523,7 @@ struct SettingsView: View {
                   "MacMonitor")
               NSWorkspace.shared.open(path)
             }
-            Text("Mac Monitor · Version 1.0\nA native dashboard built for your Mac.").font(
+            Text("\(AppIdentity.name) · Version \(AppIdentity.version)\nSystem monitoring and cleanup for your Mac.").font(
               .system(size: 12)
             ).foregroundStyle(Color.muted).padding(.top, 12)
           } else if section == "Layout" {
