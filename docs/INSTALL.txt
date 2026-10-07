@@ -1,0 +1,32 @@
+Mac Monitor 1.0.0
+
+Requirements
+Apple Silicon Mac (M1 or later), macOS 14.2 or later.
+
+Install
+1. Drag Mac Monitor.app to the Applications folder beside it.
+2. Eject this disk image.
+3. Open Mac Monitor from Applications.
+
+This community build is signed locally (ad hoc), rather than with a Developer
+ID certificate, and is not notarized by Apple. If macOS blocks the first launch,
+review the source and download, then use System Settings > Privacy & Security >
+Open Anyway to approve this specific app. Apple's instructions:
+https://support.apple.com/102445
+
+The dashboard and menu-bar panel show live readings. Click a card to open its
+tab. Clicking outside the menu-bar panel dismisses it. Closing the dashboard
+keeps the monitor running; use Quit or Command-Q to exit completely.
+
+Optional access
+Per-app audio mixing requires macOS system-audio permission. You can enable it
+under Privacy & Security > Screen & System Audio Recording and relaunch.
+Bluetooth device discovery starts when you click Read Bluetooth Devices.
+Notifications and launch at login are enabled from the app's Settings.
+
+Your data stays on this Mac. History is stored in:
+~/Library/Application Support/MacMonitor/history.sqlite
+
+Hardware readings vary by Mac. Dashes mean a reading is unavailable. Desktop
+Macs do not have an internal battery. Fan speeds are read-only; manual fan
+control is not included. This app does not require an account or a web server.
