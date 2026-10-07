@@ -23,12 +23,16 @@ if [ ! -f "$task_root/Resources/AppIcon.icns" ]; then
   iconutil -c icns "$task_root/Resources/AppIcon.iconset" -o "$task_root/Resources/AppIcon.icns"
 fi
 cp "$task_root/Resources/AppIcon.icns" "$task_app/Contents/Resources/AppIcon.icns"
-cp "$task_root/Resources/BlitzClean-LICENSE.txt" "$task_app/Contents/Resources/BlitzClean-LICENSE.txt"
+cp "$task_root/Resources/ThirdPartyNotices.txt" "$task_app/Contents/Resources/ThirdPartyNotices.txt"
 xattr -cr "$task_app"
 codesign --force --sign - --identifier local.macmonitor.app --requirements '=designated => identifier "local.macmonitor.app"' "$task_app"
 codesign --verify --deep --strict "$task_app"
 task_output="$task_root/dist/$task_name.app"
 mkdir -p "$task_root/dist"
+# Replace the generated bundle so renamed or removed resources cannot survive a rebuild.
+if [[ -e "$task_output" ]]; then
+  rm -rf "$task_output"
+fi
 ditto --norsrc --noextattr "$task_app" "$task_output"
 xattr -cr "$task_output"
 codesign --verify --deep --strict "$task_output"

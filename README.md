@@ -4,7 +4,7 @@
 
 A native macOS app for **system monitoring and cleanup**. Watch live system and app statistics, then explore your storage, review files to remove, recover unresponsive apps and manage development processes — all in one dark interface.
 
-Runs locally, with no account, telemetry, cloud service or web server required. Built with SwiftUI, AppKit, C and Objective-C, with integrated MIT-licensed BlitzClean tools.
+Runs locally, with no account, telemetry, cloud service or web server required. Built with SwiftUI, AppKit, C and Objective-C.
 
 **[Download for Mac — DMG](https://github.com/thelordzeus/mac-monitor/releases/latest/download/Mac-Pulse-arm64.dmg)** · [ZIP](https://github.com/thelordzeus/mac-monitor/releases/latest/download/Mac-Pulse-arm64.zip) · [Release notes](https://github.com/thelordzeus/mac-monitor/releases/latest)
 
@@ -29,7 +29,7 @@ See what is using your Mac's resources, with live readings, app rankings and loc
 
 ## Clean up and regain control
 
-Open **Cleanup** or press **⌘⇧K** for the integrated BlitzClean workspace. Choose a tool, scan, review the results and select the action you want to take.
+Open **Cleanup** or press **⌘⇧K** for the storage and app recovery workspace. Choose a tool, scan, review the results and select the action you want to take.
 
 ![Mac Pulse Cleanup workspace with storage, cleanup, app recovery and developer tools](artifacts/screenshots/cleanup.png)
 
@@ -193,4 +193,4 @@ The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk wo
 
 The monitoring interface is inspired by [Vitals](https://vitalsmac.com/). Mac Pulse is an independent implementation with its own name, icon and source code and is not affiliated with Vitals.
 
-Cleanup uses [BlitzClean](https://github.com/blitzreels/blitzclean)'s MIT-licensed engines at a pinned revision. See [component details and license](ThirdParty/BlitzClean/README.md) and [cleanup verification](docs/CLEANUP-VERIFICATION.md). The upstream app shell and updater are excluded.
+Required third-party copyright and license notices are preserved in [ThirdPartyNotices.txt](Resources/ThirdPartyNotices.txt) and included in the app bundle. See [cleanup component details](ThirdParty/Cleanup/README.md) and [cleanup verification](docs/CLEANUP-VERIFICATION.md).

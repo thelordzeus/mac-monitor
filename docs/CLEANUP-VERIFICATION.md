@@ -1,6 +1,6 @@
 # Cleanup integration verification
 
-BlitzClean source revision: `3506723c63d7a67287636cf15dfd0f720451df98`.
+Cleanup engines are built as the internal `CleanupCore` module.
 Validation date: 7 October 2026, Apple Silicon/macOS, Xcode toolchain.
 
 Run the fixture suite with `./scripts/test-cleanup.sh`. It exercises:
@@ -45,6 +45,13 @@ search. Preparing two real cache rows kept the running app's cache and presented
 the closed app's exact cache path and measured size for confirmation. Cancel
 preserved both caches. The new fixture tests cover actual moves into a temporary
 fixture Trash; no real user cache was moved during native verification.
+
+For 1.3.1, the full fixture suite passed after the module/component rename.
+Native checks confirmed the Cleanup landing page, Setup, Inventory search and
+cache selection controls. The current source and resource names contain no
+former branding except the required copyright notice in `ThirdPartyNotices.txt`.
+The executable's strings contain no former branding, and fresh bundle resources
+contain only the app icon and the neutral notices file.
 
 Permission restrictions and changing processes/volumes remain practical limits.
 FFmpeg export was not verified end to end on this Mac; neither were destructive

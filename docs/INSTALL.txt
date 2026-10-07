@@ -1,4 +1,4 @@
-Mac Pulse 1.3.0
+Mac Pulse 1.3.1
 
 Requirements
 Apple Silicon Mac (M1 or later), macOS 14.2 or later.
@@ -28,7 +28,7 @@ Bluetooth device discovery starts when you click Read Bluetooth Devices.
 Notifications and launch at login are enabled from the app's Settings.
 
 Cleanup
-Open Cleanup or press Command-Shift-K for the integrated BlitzClean tools.
+Open Cleanup or press Command-Shift-K for storage cleanup and app recovery tools.
 Choose Review cleanup to scan caches, developer files, Docker, simulators and
 worktrees. Review and confirm selected removals. Personal-file removal uses
 Trash; eligible caches and developer cleanup are removed permanently.

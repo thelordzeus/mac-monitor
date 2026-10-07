@@ -1,5 +1,5 @@
 import AppKit
-import BlitzCleanIntegration
+import CleanupCore
 import SwiftUI
 
 @MainActor struct DashboardView: View {
