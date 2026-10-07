@@ -5,6 +5,8 @@ Vendored from https://github.com/blitzreels/blitzclean at commit
 
 The original copyright and MIT license are preserved in [LICENSE](LICENSE).
 The app bundle contains `Contents/Resources/BlitzClean-LICENSE.txt`.
+Credits live in the repository documentation and bundled license; the Cleanup
+interface focuses on tools and setup.
 
 Mac Pulse builds this code as an internal `BlitzCleanIntegration` module.
 `MacMonitorCleanup.swift` is the facade and native Cleanup workspace. The upstream

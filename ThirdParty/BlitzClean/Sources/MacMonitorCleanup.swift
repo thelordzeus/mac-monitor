@@ -190,7 +190,7 @@ public struct MacMonitorCleanupView: View {
         .background(BlitzUI.mint.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
       VStack(alignment: .leading, spacing: 6) {
         Text("A little room to breathe").font(.system(size: 22, weight: .semibold))
-        Text("Storage, cleanup and app recovery · powered by BlitzClean")
+        Text("Storage, cleanup and app recovery")
           .font(.system(size: 13)).foregroundStyle(BlitzUI.secondaryText)
       }
       Spacer(minLength: 16)
@@ -325,12 +325,6 @@ private struct CleanupSetupView: View {
               UserDefaults.standard.set(roots, forKey: "locations.projectRoots")
             }
           }.blitzButton(.secondary)
-        }.panelCard()
-        VStack(alignment: .leading, spacing: 8) {
-          Text("BlitzClean integration").font(BlitzType.title)
-          Text("Based on the MIT-licensed BlitzClean project. Cleanup history and review state stay on this Mac.")
-            .font(BlitzType.callout).foregroundStyle(BlitzUI.secondaryText)
-          Link("View source & license", destination: AppBrand.repositoryURL).font(BlitzType.callout)
         }.panelCard()
       }.padding(24)
     }.task { permissions.refresh() }
