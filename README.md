@@ -57,9 +57,6 @@ The images show actual readings from an Apple M4 desktop Mac; screenshot totals 
 | --- | --- |
 | ![CPU usage, recent chart and app rankings](artifacts/screenshots/cpu.png) | ![Memory usage, pressure, component totals and app rankings](artifacts/screenshots/memory.png) |
 
-<details>
-<summary>Disk, network and GPU</summary>
-
 ### Disk
 
 ![Disk capacity, read/write rates and app writes](artifacts/screenshots/disk.png)
@@ -71,11 +68,6 @@ The images show actual readings from an Apple M4 desktop Mac; screenshot totals 
 ### GPU
 
 ![GPU utilization, graphics memory and app GPU time](artifacts/screenshots/gpu.png)
-
-</details>
-
-<details>
-<summary>Battery, sound, Bluetooth and projects</summary>
 
 ### Battery
 
@@ -92,8 +84,6 @@ The images show actual readings from an Apple M4 desktop Mac; screenshot totals 
 ### Projects
 
 ![Running development projects and listening ports](artifacts/screenshots/projects.png)
-
-</details>
 
 ## Getting started
 
