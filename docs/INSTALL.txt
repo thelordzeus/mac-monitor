@@ -1,4 +1,4 @@
-Mac Monitor 1.0.0
+Mac Monitor 1.1.0
 
 Requirements
 Apple Silicon Mac (M1 or later), macOS 14.2 or later.
@@ -23,6 +23,16 @@ Per-app audio mixing requires macOS system-audio permission. You can enable it
 under Privacy & Security > Screen & System Audio Recording and relaunch.
 Bluetooth device discovery starts when you click Read Bluetooth Devices.
 Notifications and launch at login are enabled from the app's Settings.
+
+Cleanup
+Open Cleanup or press Command-Shift-K for the integrated BlitzClean tools.
+Choose Review cleanup to scan caches, developer files, Docker, simulators and
+worktrees. Review and confirm selected removals. Personal-file removal uses
+Trash; eligible caches and developer cleanup are removed permanently.
+Cleanup > Setup offers optional Full Disk Access and Accessibility settings.
+Media export needs an existing ffmpeg/ffprobe installation and keeps originals.
+Cleanup history is stored under:
+~/Library/Application Support/MacMonitor/Cleanup
 
 Your data stays on this Mac. History is stored in:
 ~/Library/Application Support/MacMonitor/history.sqlite

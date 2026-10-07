@@ -1,4 +1,5 @@
 import AppKit
+import BlitzCleanIntegration
 import Combine
 import SwiftUI
 
@@ -19,10 +20,12 @@ struct MacMonitorApp: App {
           Button("Export App Stats…") { store.exportCSV() }.keyboardShortcut(
             "e", modifiers: [.command, .shift])
           Divider()
-          ForEach(Array(MonitorTab.allCases.enumerated()), id: \.element.id) { i, tab in
+          ForEach(Array(MonitorTab.allCases.prefix(10).enumerated()), id: \.element.id) { i, tab in
             Button(tab.rawValue) { store.selectedTab = tab }.keyboardShortcut(
               KeyEquivalent(Character(String((i + 1) % 10))), modifiers: .command)
           }
+          Button("Cleanup") { store.selectedTab = .cleanup }.keyboardShortcut(
+            "k", modifiers: [.command, .shift])
         }
       }
   }
@@ -63,6 +66,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
   private var popover = NSPopover()
   private var store: MonitorStore?
   private var subscription: AnyCancellable?
+  private var cleanupSubscription: AnyCancellable?
   private var showWindow: (() -> Void)?
   private var outsideClickMonitor: Any?
   private var localClickMonitor: Any?
@@ -73,6 +77,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
   func applicationWillTerminate(_ notification: Notification) {
     stopDismissalMonitoring()
     store?.flushHistory()
+    store?.stopCleanup()
   }
   func applicationDidResignActive(_ notification: Notification) {
     if popover.isShown { popover.performClose(nil) }
@@ -91,6 +96,9 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
       rootView: MenuDashboard(store: store, open: { [weak self] in self?.openWindow() }))
     subscription = store.objectWillChange.debounce(for: .milliseconds(120), scheduler: RunLoop.main)
       .sink { [weak self] _ in self?.updateTitle() }
+    cleanupSubscription = NotificationCenter.default.publisher(
+      for: CleanupWorkspace.openNotification).receive(on: RunLoop.main)
+      .sink { [weak self] _ in self?.openWindow() }
     updateTitle()
   }
   private func updateTitle() {
@@ -222,6 +230,10 @@ struct MenuDashboard: View {
       HStack {
         Button("Open Dashboard") {
           store.selectedTab = .overview
+          open()
+        }
+        Button("Cleanup") {
+          store.selectedTab = .cleanup
           open()
         }
         Spacer()

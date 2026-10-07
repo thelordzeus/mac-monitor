@@ -1,13 +1,17 @@
 import AppKit
+import BlitzCleanIntegration
 import SwiftUI
 
-struct DashboardView: View {
+@MainActor struct DashboardView: View {
   @ObservedObject var store: MonitorStore
   var exporting = false
   var body: some View {
     VStack(spacing: 0) {
       header
-      if exporting {
+      if store.selectedTab == .cleanup {
+        MacMonitorCleanupView(workspace: store.cleanupWorkspace(), exporting: exporting)
+          .onAppear { store.cleanupWorkspace().update(store.cleanupMetrics) }
+      } else if exporting {
         dashboardContent.frame(maxHeight: .infinity, alignment: .top).clipped()
       } else {
         ScrollView { dashboardContent }.scrollIndicators(.hidden)
@@ -42,24 +46,36 @@ struct DashboardView: View {
   private var header: some View {
     HStack(spacing: 0) {
       WindowControls().frame(width: 88, alignment: .leading)
-      HStack(spacing: 2) {
-        ForEach(store.visibleTabs) { tab in
-          Button {
-            store.selectedTab = tab
-            store.search = ""
-          } label: {
-            HStack(spacing: 7) {
-              Image(systemName: tab.symbol).font(.system(size: 12))
-              Text(tab.rawValue).font(.system(size: 14, weight: .medium))
-            }
-            .foregroundStyle(store.selectedTab == tab ? tab.color : Color.muted)
-            .padding(.horizontal, 13).padding(.vertical, 10)
-            .background(store.selectedTab == tab ? tab.color.opacity(0.16) : .clear, in: Capsule())
-          }.buttonStyle(.plain).help("Show \(tab.rawValue)")
+      if exporting {
+        tabButtons
+      } else {
+        ScrollViewReader { proxy in
+          ScrollView(.horizontal, showsIndicators: false) {
+            tabButtons
+          }.fixedSize(horizontal: false, vertical: true)
+            .onChange(of: store.selectedTab) { _, tab in proxy.scrollTo(tab) }
         }
-      }.padding(4).background(Color.surface, in: Capsule())
+      }
       Spacer(minLength: 12)
     }.padding(.leading, 18).frame(height: 72)
+  }
+  private var tabButtons: some View {
+    HStack(spacing: 2) {
+      ForEach(store.visibleTabs) { tab in
+        Button {
+          store.selectedTab = tab
+          store.search = ""
+        } label: {
+          HStack(spacing: 7) {
+            Image(systemName: tab.symbol).font(.system(size: 12))
+            Text(tab.rawValue).font(.system(size: 14, weight: .medium))
+          }
+          .foregroundStyle(store.selectedTab == tab ? tab.color : Color.muted)
+          .padding(.horizontal, 13).padding(.vertical, 10)
+          .background(store.selectedTab == tab ? tab.color.opacity(0.16) : .clear, in: Capsule())
+        }.buttonStyle(.plain).help("Show \(tab.rawValue)").id(tab)
+      }
+    }.padding(4).background(Color.surface, in: Capsule())
   }
   private var footer: some View {
     HStack(spacing: 12) {
@@ -72,6 +88,7 @@ struct DashboardView: View {
       Spacer()
       if store.selectedTab != .sound && store.selectedTab != .bluetooth
         && store.selectedTab != .projects
+        && store.selectedTab != .cleanup
       {
         HStack(spacing: 4) {
           ForEach(HistoryRange.allCases, id: \.self) { range in

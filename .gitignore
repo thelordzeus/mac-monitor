@@ -6,3 +6,6 @@ dist/
 # Local machine audit data is not published.
 artifacts/metrics-audit.json
 artifacts/local/
+
+# The local downloads dashboard has its own repository.
+sites/

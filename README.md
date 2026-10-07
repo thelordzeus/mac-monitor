@@ -1,6 +1,6 @@
 # Mac Monitor
 
-A native macOS dashboard for seeing what your Mac is doing. Monitor CPU, memory, GPU, disks, network traffic, battery, audio, Bluetooth devices and development projects in one dark interface.
+A native macOS dashboard for seeing what your Mac is doing. Monitor CPU, memory, GPU, disks, network traffic, battery, audio, Bluetooth devices and development projects, with integrated BlitzClean cleanup tools in the same dark interface.
 
 Built with SwiftUI, AppKit, C and Objective-C. All readings come from the Mac. No account, telemetry, cloud service, external package dependencies or web server is required.
 
@@ -39,6 +39,7 @@ To verify a download, run `shasum -a 256 Mac-Monitor-arm64.dmg` and compare its 
 | **Sound** | Choose an output, adjust supported system volume, see playing/silent status, and adjust or mute each app through Core Audio process taps. |
 | **Bluetooth** | Connected/paired devices and reported battery levels, including earbud/case readings when macOS supplies them. |
 | **Projects** | Runtimes grouped by working directory, listening ports, observed CPU inactivity and confirmed process termination. |
+| **Cleanup** | Integrated BlitzClean tools: cache/developer cleanup, folder browsing, storage inventory, large files, exact duplicates, media export, app recovery, AI workers and project controls. |
 
 Beyond the tabs:
 
@@ -85,6 +86,10 @@ The images show actual readings from an Apple M4 desktop Mac; screenshot totals 
 
 ![Running development projects and listening ports](artifacts/screenshots/projects.png)
 
+### Cleanup
+
+![BlitzClean tools integrated into Mac Monitor's native Cleanup workspace](artifacts/screenshots/cleanup.png)
+
 ## Getting started
 
 Click a metric card or a top tab for detail. Click an app row for its processes and history. Use the time ranges at the bottom to inspect saved readings, the pause button to pause collection, the bell for activity alerts, the share button for exports and the gear for settings.
@@ -95,6 +100,7 @@ Click a metric card or a top tab for detail. Click an app row for its processes 
 | `⌘,` | Open settings. |
 | `⌘⇧P` | Pause/resume monitoring. |
 | `⌘⇧E` | Export app statistics. |
+| `⌘⇧K` | Open Cleanup. |
 | `Esc` | Dismiss the menu-bar panel. |
 | `⌘Q` | Quit the app. |
 
@@ -104,6 +110,20 @@ Click a metric card or a top tab for detail. Click an app row for its processes 
 - **Bluetooth:** click **Read Bluetooth Devices** or Refresh to start discovery. Devices that do not report battery levels show **Not reported**.
 - **Notifications:** enable them in the app's settings. They are off by default.
 - **Launch at login:** enable it in settings. macOS may require approval in Login Items.
+
+### Cleanup with BlitzClean
+
+Open **Cleanup** or press **⌘⇧K**, then choose **Review cleanup**. Opening a tool starts its scan; the landing page does not scan your disk. Review eligible old caches/reports, inactive `node_modules` with an exact reinstall lock, generated builds, simulator devices, Docker rebuildable storage and merged Git worktrees. Removal requires review/confirmation; the engines recheck file/process identity and activity. Docker containers and volumes are preserved.
+
+**Browse** explores folders and mounted drives. **Inventory** summarizes storage categories. **Files & media** ranks large files and verifies exact duplicates; personal-file removal uses Trash. Media export requires an existing `ffmpeg`/`ffprobe` installation and writes a separate output while keeping the original. No tools are installed automatically.
+
+**Revive apps** checks app health and offers recovery, normal quit and reviewed force quit. **AI & apps** inspects supported AI threads and app/process memory. **Projects** adds pause/resume, explicit stop, saved start commands and optional pressure policies. Pausing a process still holds its RAM. These controls act only when selected or explicitly enabled.
+
+Optional Full Disk Access includes protected folders in scans; Accessibility enables additional app-health checks. Open **Cleanup → Setup** to review permissions and add project folders. Ordinary review works with access already available.
+
+Cleanup history and review state stay under `~/Library/Application Support/MacMonitor/Cleanup`. Scans may be incomplete due to permissions, changing volumes or scan budgets; the UI reports those limits. Scanned sizes differ from actual free-space gains. Dashboard image export shows the Cleanup tools overview; individual scan results remain in the interactive views.
+
+The integration uses [BlitzClean](https://github.com/blitzreels/blitzclean)'s MIT-licensed source at a pinned revision, with Mac Monitor's theme and collector. See [component details and license](ThirdParty/BlitzClean/README.md). The upstream app shell and updater are excluded.
 
 ## Build from source
 
@@ -151,13 +171,14 @@ The build and core statistics/history checks were validated on an Apple M4 Mac. 
 ## Development checks
 
 ```sh
+./scripts/test-cleanup.sh
 "dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --self-test
 "dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --diagnostics
 python3 scripts/verify-metrics.py
 "dist/Mac Monitor.app/Contents/MacOS/MacMonitor" --render artifacts/screenshots
 ```
 
-The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. `--render` produces all ten screenshots from real Mac readings; it does not inject simulated statistics.
+The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. `--render` produces the monitoring screenshots and Cleanup landing page from real Mac readings; it does not inject simulated statistics.
 
 ## Design reference
 

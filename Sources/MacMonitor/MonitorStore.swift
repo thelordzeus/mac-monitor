@@ -1,4 +1,5 @@
 import AppKit
+import BlitzCleanIntegration
 import Combine
 import SwiftUI
 import SystemBridge
@@ -63,6 +64,20 @@ final class MonitorStore: ObservableObject {
   @Published var menuMetrics: Set<MonitorTab> = [.cpu, .memory]
   let audio = AudioController()
   let bluetooth = BluetoothController()
+  private var cleanupInstance: CleanupWorkspace?
+  @MainActor func cleanupWorkspace() -> CleanupWorkspace {
+    if let cleanupInstance { return cleanupInstance }
+    let workspace = CleanupWorkspace()
+    workspace.update(cleanupMetrics)
+    cleanupInstance = workspace
+    return workspace
+  }
+  var cleanupMetrics: CleanupMetrics {
+    CleanupMetrics(diskAvailable: snapshot.diskFree, diskTotal: snapshot.diskTotal,
+      ramAvailable: snapshot.availableMemory, ramTotal: snapshot.totalMemory,
+      cpuPercent: snapshot.cpu, pressure: snapshot.pressure, date: snapshot.date)
+  }
+  @MainActor func stopCleanup() { cleanupInstance?.shutdown() }
   private let queue = DispatchQueue(label: "MacMonitor.collector", qos: .utility)
   private let collector = Collector()
   private var history: HistoryStore?
@@ -102,7 +117,10 @@ final class MonitorStore: ObservableObject {
     if let raw = UserDefaults.standard.stringArray(forKey: "tabOrder") {
       tabOrder = raw.compactMap(MonitorTab.init(rawValue:))
     }
-    if tabOrder.count != MonitorTab.allCases.count { tabOrder = MonitorTab.allCases }
+    // Preserve the user's order when a release adds a new tab.
+    var seen = Set<MonitorTab>()
+    tabOrder = tabOrder.filter { seen.insert($0).inserted }
+    tabOrder += MonitorTab.allCases.filter { !seen.contains($0) }
     hiddenTabs = Set(
       (UserDefaults.standard.stringArray(forKey: "hiddenTabs") ?? []).compactMap(
         MonitorTab.init(rawValue:)))
@@ -117,6 +135,10 @@ final class MonitorStore: ObservableObject {
       in: &subscriptions)
     bluetooth.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }.store(
       in: &subscriptions)
+    NotificationCenter.default.publisher(for: CleanupWorkspace.openNotification)
+      .receive(on: RunLoop.main).sink { [weak self] _ in
+        self?.selectedTab = .cleanup
+      }.store(in: &subscriptions)
     if start {
       queue.async { self.history = HistoryStore() }
       refresh()
@@ -156,6 +178,7 @@ final class MonitorStore: ObservableObject {
       let m = self.history?.totals(since: s.date.addingTimeInterval(-2_592_000)) ?? Totals()
       DispatchQueue.main.async {
         self.snapshot = s
+        self.cleanupInstance?.update(self.cleanupMetrics)
         self.today = t
         self.week = w
         self.month = m
