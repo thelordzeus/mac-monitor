@@ -24,7 +24,18 @@ if [ ! -f "$task_root/Resources/AppIcon.icns" ]; then
 fi
 cp "$task_root/Resources/AppIcon.icns" "$task_app/Contents/Resources/AppIcon.icns"
 cp "$task_root/Resources/ThirdPartyNotices.txt" "$task_app/Contents/Resources/ThirdPartyNotices.txt"
+task_sparkle="$task_root/.build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
+mkdir -p "$task_app/Contents/Frameworks"
+ditto --norsrc --noextattr "$task_sparkle" "$task_app/Contents/Frameworks/Sparkle.framework"
+task_framework="$task_app/Contents/Frameworks/Sparkle.framework"
+# This app is not sandboxed; use Sparkle's regular installer instead of XPC services.
+rm -rf "$task_framework/Versions/B/XPCServices" "$task_framework/XPCServices"
+cp "$task_root/.build/artifacts/sparkle/Sparkle/LICENSE" "$task_app/Contents/Resources/Sparkle-LICENSE.txt"
 xattr -cr "$task_app"
+# Sign nested code before its containing framework and app, preserving bundle symlinks.
+codesign --force --sign - --options=0 "$task_framework/Versions/B/Autoupdate"
+codesign --force --sign - --options=0 "$task_framework/Versions/B/Updater.app"
+codesign --force --sign - --options=0 "$task_framework"
 codesign --force --sign - --identifier local.macmonitor.app --requirements '=designated => identifier "local.macmonitor.app"' "$task_app"
 codesign --verify --deep --strict "$task_app"
 task_output="$task_root/dist/$task_name.app"

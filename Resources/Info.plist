@@ -6,8 +6,8 @@
   <key>CFBundleDisplayName</key><string>Mac Pulse</string>
   <key>CFBundleExecutable</key><string>MacMonitor</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.3.1</string>
-  <key>CFBundleVersion</key><string>8</string>
+  <key>CFBundleShortVersionString</key><string>1.4.0</string>
+  <key>CFBundleVersion</key><string>9</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>LSMinimumSystemVersion</key><string>14.2</string>
   <key>NSHighResolutionCapable</key><true/>
@@ -15,4 +15,13 @@
   <key>NSAudioCaptureUsageDescription</key><string>Mac Pulse processes audio locally to let you change each app's volume. Audio is never recorded or transmitted.</string>
   <key>NSBluetoothAlwaysUsageDescription</key><string>Mac Pulse reads connected Bluetooth devices and their battery levels when you open the Bluetooth panel.</string>
   <key>NSPrincipalClass</key><string>NSApplication</string>
+  <key>SUFeedURL</key><string>https://raw.githubusercontent.com/thelordzeus/mac-monitor/main/appcast.xml</string>
+  <key>SUPublicEDKey</key><string>wde7OmSwQQMBNuobi+4SSCLA9MVUY6FvA39kte4mjiU=</string>
+  <key>SUEnableAutomaticChecks</key><true/>
+  <key>SUScheduledCheckInterval</key><integer>86400</integer>
+  <key>SUAutomaticallyUpdate</key><false/>
+  <key>SUEnableSystemProfiling</key><false/>
+  <key>SUVerifyUpdateBeforeExtraction</key><true/>
+  <key>SURequireSignedFeed</key><true/>
+  <key>SUSignedFeedFailureExpirationInterval</key><integer>0</integer>
 </dict></plist>

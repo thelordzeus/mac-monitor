@@ -6,11 +6,16 @@ import SwiftUI
 struct MacMonitorApp: App {
   @NSApplicationDelegateAdaptor(MonitorAppDelegate.self) private var delegate
   @StateObject private var store = MonitorStore()
+  @StateObject private var updater = AppUpdater()
   var body: some Scene {
     WindowGroup(AppIdentity.name, id: "dashboard") {
-      DashboardRoot(store: store, delegate: delegate)
+      DashboardRoot(store: store, delegate: delegate, updater: updater)
     }.defaultSize(width: 1260, height: 890).windowStyle(.hiddenTitleBar)
       .commands {
+        CommandGroup(after: .appInfo) {
+          Button("Check for Updates…") { updater.checkForUpdates() }
+            .disabled(!updater.canCheckForUpdates)
+        }
         CommandGroup(replacing: .appSettings) {
           Button("Settings…") { store.settingsVisible = true }.keyboardShortcut(",")
         }
@@ -33,11 +38,16 @@ struct MacMonitorApp: App {
 struct DashboardRoot: View {
   @ObservedObject var store: MonitorStore
   let delegate: MonitorAppDelegate
+  @ObservedObject var updater: AppUpdater
   @Environment(\.openWindow) private var openWindow
   var body: some View {
-    DashboardView(store: store).environmentObject(store).background(WindowSetup())
+    DashboardView(store: store).environmentObject(store).environmentObject(updater)
+      .background(WindowSetup())
       .ignoresSafeArea(.container, edges: .top)
-      .onAppear { delegate.attach(store, showWindow: { openWindow(id: "dashboard") }) }
+      .onAppear {
+        updater.start()
+        delegate.attach(store, updater: updater, showWindow: { openWindow(id: "dashboard") })
+      }
   }
 }
 struct WindowSetup: NSViewRepresentable {
@@ -82,7 +92,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
   func applicationDidResignActive(_ notification: Notification) {
     if popover.isShown { popover.performClose(nil) }
   }
-  func attach(_ store: MonitorStore, showWindow: @escaping () -> Void) {
+  func attach(_ store: MonitorStore, updater: AppUpdater, showWindow: @escaping () -> Void) {
     self.showWindow = showWindow
     guard self.store == nil else { return }
     self.store = store
@@ -93,7 +103,12 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
     popover.delegate = self
     popover.contentSize = NSSize(width: 420, height: 580)
     popover.contentViewController = NSHostingController(
-      rootView: MenuDashboard(store: store, open: { [weak self] in self?.openWindow() }))
+      rootView: MenuDashboard(
+        store: store, updater: updater, open: { [weak self] in self?.openWindow() },
+        checkForUpdates: { [weak self] in
+          self?.popover.performClose(nil)
+          updater.checkForUpdates()
+        }))
     subscription = store.objectWillChange.debounce(for: .milliseconds(120), scheduler: RunLoop.main)
       .sink { [weak self] _ in self?.updateTitle() }
     cleanupSubscription = NotificationCenter.default.publisher(
@@ -174,7 +189,9 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
 }
 struct MenuDashboard: View {
   @ObservedObject var store: MonitorStore
+  @ObservedObject var updater: AppUpdater
   var open: () -> Void
+  var checkForUpdates: @MainActor () -> Void
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
       HStack {
@@ -227,6 +244,9 @@ struct MenuDashboard: View {
         }.buttonStyle(.plain)
       }
       Divider()
+      Button("Check for Updates…", action: checkForUpdates)
+        .disabled(!updater.canCheckForUpdates)
+        .buttonStyle(.plain).font(.system(size: 12)).foregroundStyle(Color.muted)
       HStack {
         Button("Open Dashboard") {
           store.selectedTab = .overview

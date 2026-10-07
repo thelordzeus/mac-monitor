@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Mac Pulse</title>
+        <item>
+            <title>1.4.0</title>
+            <pubDate>Wed, 07 Oct 2026 23:26:34 +0530</pubDate>
+            <link>https://github.com/thelordzeus/mac-monitor/releases/tag/v1.4.0</link>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>1.4.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.2</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description sparkle:format="markdown"><![CDATA[# Mac Pulse 1.4.0
+
+- Mac Pulse now checks for updates daily and offers a native update dialog with release notes, Install, Later and Skip options.
+- Check manually from the Mac Pulse app menu, the menu-bar panel or Settings → Updates.
+- Settings → Updates lets you disable automatic checks or opt in to automatic downloads and installation.
+- Update feeds and downloads are signed and verified before extraction. Monitoring and cleanup data are never sent with update checks.
+- Your existing settings, monitoring history and Cleanup state are retained.
+
+**One-time upgrade:** versions 1.3.1 and earlier do not contain the updater. Quit the earlier app, download this release and replace it in Applications once. Subsequent releases can update inside Mac Pulse.
+
+Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free ad hoc signing and is not Apple-notarized; macOS may require approval for the first downloaded installation.
+]]></description>
+            <enclosure url="https://github.com/thelordzeus/mac-monitor/releases/download/v1.4.0/Mac-Pulse-arm64.zip" length="4251597" type="application/octet-stream" sparkle:edSignature="gjJNcUdPx7gUqR15ea7LeSo9ju+L+KK5IYmm/ORvubz0SjQM4dRnaN7rO6L1ALtUOsr+0mrm3y4IG3/ejJiAAA=="></enclosure>
+        </item>
+    </channel>
+</rss><!-- sparkle-signatures:
+edSignature: Tk8YuYQHocic71YdYpRkHPDWwJn+9dO84CJsCTZtABC2X947jC1HKT+zqPGH0jvbZsC1VjbVvKwDJV/3XzQ/Bg==
+length: 2249
+-->

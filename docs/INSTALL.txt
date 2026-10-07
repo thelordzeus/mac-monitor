@@ -1,4 +1,4 @@
-Mac Pulse 1.3.1
+Mac Pulse 1.4.0
 
 Requirements
 Apple Silicon Mac (M1 or later), macOS 14.2 or later.
@@ -10,6 +10,14 @@ Install
 
 Previously called Mac Monitor. Quit Mac Monitor before opening Mac Pulse.
 Your existing history, settings and Cleanup state are retained.
+
+Updates
+Mac Pulse 1.4.0 and later check GitHub for new releases daily. Use Mac Pulse >
+Check for Updates, the menu-bar panel, or Settings > Updates to check manually.
+The update dialog shows release notes and lets you install, skip or choose later.
+Automatic checks and optional automatic downloads can be changed in Settings.
+Updates are verified before installation; your history and settings are retained.
+Users of 1.3.1 or earlier need to replace the app manually once to get the updater.
 
 This community build is signed locally (ad hoc), rather than with a Developer
 ID certificate, and is not notarized by Apple. If macOS blocks the first launch,

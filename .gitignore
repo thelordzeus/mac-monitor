@@ -2,6 +2,8 @@
 dist/
 .DS_Store
 *.xcuserstate
+__pycache__/
+*.pyc
 
 # Local machine audit data is not published.
 artifacts/metrics-audit.json

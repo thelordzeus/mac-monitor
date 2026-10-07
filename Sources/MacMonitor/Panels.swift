@@ -469,6 +469,7 @@ struct AppDetailView: View {
 }
 struct SettingsView: View {
   @ObservedObject var store: MonitorStore
+  @EnvironmentObject private var updater: AppUpdater
   @Environment(\.dismiss) private var dismiss
   @State private var section = "General"
   @State private var login = SMAppService.mainApp.status == .enabled
@@ -483,7 +484,7 @@ struct SettingsView: View {
         }.keyboardShortcut(.cancelAction)
       }
       Picker("Section", selection: $section) {
-        ForEach(["General", "Layout", "Menu Bar", "Sensors"], id: \.self) { Text($0) }
+        ForEach(["General", "Layout", "Menu Bar", "Sensors", "Updates"], id: \.self) { Text($0) }
       }.pickerStyle(.segmented)
       ScrollView {
         VStack(alignment: .leading, spacing: 18) {
@@ -526,6 +527,59 @@ struct SettingsView: View {
             Text("\(AppIdentity.name) · Version \(AppIdentity.version)\nSystem monitoring and cleanup for your Mac.").font(
               .system(size: 12)
             ).foregroundStyle(Color.muted).padding(.top, 12)
+          } else if section == "Updates" {
+            HStack(spacing: 12) {
+              Image(systemName: "arrow.triangle.2.circlepath")
+                .font(.system(size: 22)).foregroundStyle(Color.cpuBlue)
+                .frame(width: 46, height: 46)
+                .background(Color.cpuBlue.opacity(0.14), in: RoundedRectangle(cornerRadius: 12))
+              VStack(alignment: .leading, spacing: 4) {
+                Text(AppIdentity.name).font(.system(size: 18, weight: .semibold))
+                Text("Version \(AppIdentity.version)").foregroundStyle(Color.muted)
+              }
+              Spacer()
+            }
+            Divider()
+            if updater.isAvailable {
+              Toggle(
+                "Automatically check for updates",
+                isOn: Binding(
+                  get: { updater.automaticallyChecksForUpdates },
+                  set: { updater.setAutomaticChecks($0) }))
+              Text("Checks GitHub daily. When an update is available, you can install it, skip it or choose later.")
+                .font(.system(size: 12)).foregroundStyle(Color.muted)
+              Toggle(
+                "Download and install updates automatically",
+                isOn: Binding(
+                  get: { updater.automaticallyDownloadsUpdates },
+                  set: { updater.setAutomaticDownloads($0) }))
+                .disabled(!updater.automaticallyChecksForUpdates)
+              Text("Optional. Updates download in the background and can install when you quit. Your settings and history are kept.")
+                .font(.system(size: 12)).foregroundStyle(Color.muted)
+              Divider()
+              HStack {
+                Button("Check for Updates…") {
+                  dismiss()
+                  // Let the settings sheet close before Sparkle presents its dialog.
+                  DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    updater.checkForUpdates()
+                  }
+                }.disabled(!updater.canCheckForUpdates)
+                Spacer()
+                if let date = updater.lastCheckDate {
+                  Text("Last checked \(date.formatted(date: .abbreviated, time: .shortened))")
+                    .font(.system(size: 11)).foregroundStyle(Color.muted)
+                } else {
+                  Text("Not checked yet").font(.system(size: 11)).foregroundStyle(Color.muted)
+                }
+              }
+            } else {
+              Text(updater.unavailableReason).foregroundStyle(Color.muted)
+            }
+            Link("View release notes", destination: URL(string: "https://github.com/thelordzeus/mac-monitor/releases/latest")!)
+              .font(.system(size: 12))
+            Text("Update checks send no monitoring or cleanup data. Downloads are verified before installation.")
+              .font(.system(size: 12)).foregroundStyle(Color.muted)
           } else if section == "Layout" {
             Text("Choose and reorder tabs").font(.system(size: 14, weight: .semibold))
             ForEach(Array(store.tabOrder.enumerated()), id: \.element.id) { index, tab in

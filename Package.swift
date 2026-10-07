@@ -5,6 +5,9 @@ let package = Package(
   name: "MacMonitor",
   platforms: [.macOS(.v14)],
   products: [.executable(name: "MacMonitor", targets: ["MacMonitor"])],
+  dependencies: [
+    .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0"),
+  ],
   targets: [
     .target(name: "CleanupCore", path: "ThirdParty/Cleanup/Sources"),
     .target(
@@ -13,9 +16,12 @@ let package = Package(
         .linkedFramework("IOKit"), .linkedFramework("CoreAudio"), .linkedFramework("Foundation"),
       ]),
     .executableTarget(
-      name: "MacMonitor", dependencies: ["SystemBridge", "CleanupCore"], path: "Sources/MacMonitor",
+      name: "MacMonitor",
+      dependencies: ["SystemBridge", "CleanupCore", .product(name: "Sparkle", package: "Sparkle")],
+      path: "Sources/MacMonitor",
       linkerSettings: [
         .linkedFramework("IOBluetooth"), .linkedFramework("Metal"), .linkedLibrary("sqlite3"),
+        .unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"]),
       ]),
     .testTarget(name: "CleanupCoreTests", dependencies: ["CleanupCore"]),
   ]

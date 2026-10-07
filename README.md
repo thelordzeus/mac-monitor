@@ -67,6 +67,18 @@ The [ZIP](https://github.com/thelordzeus/mac-monitor/releases/latest/download/Ma
 
 The downloadable build is signed locally (**ad hoc**) and is **not notarized by Apple**. If macOS blocks the first launch, review the source and download, then approve this specific app in **System Settings → Privacy & Security → Open Anyway**. See [Apple's first-launch instructions](https://support.apple.com/102445).
 
+## Stay up to date
+
+Starting with **1.4.0**, Mac Pulse checks GitHub for updates once a day. When a new release is available, a native dialog shows the release notes and offers **Install**, **Later** and **Skip**. Choose **Mac Pulse → Check for Updates…**, use the menu-bar panel, or open **Settings → Updates** to check manually.
+
+Automatic checks can be disabled. Automatic downloads and installation are off by default; you can opt in from Settings. Updates preserve your monitoring history, preferences and Cleanup state.
+
+![Mac Pulse Updates settings with automatic checks, optional automatic installation and a manual update button](artifacts/screenshots/updates.png)
+
+**Already using 1.3.1 or earlier?** Quit the old app, download the latest DMG and replace it in Applications once. Those versions do not include an updater. Later releases can update inside the app.
+
+Updates use [Sparkle](https://sparkle-project.org/) with signed feeds and Ed25519-signed archives hosted on GitHub. Signatures are checked before extraction. No paid Apple Developer membership or user account is needed. Update requests send no system metrics or cleanup data; GitHub receives ordinary network requests for the feed and downloads. The first-install approval described above still applies to this non-notarized app.
+
 ## Everyday tools
 
 - **Menu bar:** choose live readouts and open a compact dashboard. Monitoring continues when you close the main window; use Quit to stop the app.
@@ -75,6 +87,7 @@ The downloadable build is signed locally (**ad hoc**) and is **not notarized by 
 - **App controls:** search, pin apps, include system processes, inspect processes and confirm graceful or forced termination.
 - **Export:** save/copy a dashboard PNG or export app statistics as CSV.
 - **Customization:** reorder/hide tabs and overview cards, choose refresh interval, Celsius/Fahrenheit and network bits/bytes, and enable launch at login.
+- **Updates:** daily checks, manual checks, signed downloads, release notes and optional automatic installation.
 
 Use the footer's time ranges to inspect saved readings, pause to stop collection, the bell for activity alerts, share for exports and the gear for settings.
 
@@ -145,7 +158,7 @@ cd mac-monitor
 ./scripts/run.sh
 ```
 
-The build script compiles a release executable, creates `dist/Mac Pulse.app`, adds the icon and signs the bundle locally. It uses `/Applications/Xcode.app` when available, otherwise the selected Command Line Tools. SDKs requiring SwiftUI macro plugins, including macOS 27, need **full Xcode**. No paid developer account is needed for this local build. The executable targets the architecture of the machine compiling it.
+The build script compiles a release executable, creates `dist/Mac Pulse.app`, embeds the pinned Sparkle framework, adds the icon and signs the bundle locally. SwiftPM downloads Sparkle on the first build, so that build needs internet access. It uses `/Applications/Xcode.app` when available, otherwise the selected Command Line Tools. SDKs requiring SwiftUI macro plugins, including macOS 27, need **full Xcode**. No paid developer account is needed for this local build. The executable targets the architecture of the machine compiling it.
 
 ### Create a DMG and ZIP
 
@@ -156,6 +169,24 @@ The build script compiles a release executable, creates `dist/Mac Pulse.app`, ad
 The script builds the app and creates architecture-specific DMG/ZIP files plus `dist/SHA256SUMS`. The DMG includes the app, an Applications shortcut and installation notes. If you already built the current source, use `./scripts/package.sh --skip-build`.
 
 Built artifacts stay in `dist/` and are excluded from Git. Publish the DMG, ZIP and checksums as GitHub Release assets rather than committing binaries.
+
+### Publish an update
+
+After bumping both version/build in `Resources/Info.plist` and writing the matching release notes:
+
+```sh
+./scripts/build.sh
+./scripts/package.sh --skip-build
+./scripts/make-appcast.sh
+```
+
+Commit the completed source, notes and generated `appcast.xml`, then push to `main` and run:
+
+```sh
+./scripts/publish-release.sh
+```
+
+The signing key stays in the releasing Mac's Keychain under account `mac-pulse`. The feed generator verifies that the key matches the public key embedded in the app, preserves older feed entries, signs the feed and archive, and validates their signatures. The publisher requires a clean, pushed commit, verifies the release files, and uploads the DMG, ZIP, checksums and signed feed. It does not overwrite older releases. See [update maintenance and verification](docs/UPDATES.md).
 
 ## How readings and history work
 
@@ -194,3 +225,5 @@ The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk wo
 The monitoring interface is inspired by [Vitals](https://vitalsmac.com/). Mac Pulse is an independent implementation with its own name, icon and source code and is not affiliated with Vitals.
 
 Required third-party copyright and license notices are preserved in [ThirdPartyNotices.txt](Resources/ThirdPartyNotices.txt) and included in the app bundle. See [cleanup component details](ThirdParty/Cleanup/README.md) and [cleanup verification](docs/CLEANUP-VERIFICATION.md).
+
+The updater uses [Sparkle 2.10.0](https://github.com/sparkle-project/Sparkle), with its [license and dependency notices](Resources/Sparkle-LICENSE.txt) included in the app.
