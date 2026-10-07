@@ -99,15 +99,16 @@ struct DashboardView: View {
         Image(systemName: store.alerts.isEmpty ? "bell" : "bell.badge")
       }.help("Activity alerts")
       if exporting {
-        Image(systemName: "square.and.arrow.up").frame(width: 20)
+        exportIcon
       } else {
         Menu {
           Button("Save Dashboard Image…") { exportDashboard() }
           Button("Copy Dashboard") { exportDashboard(copy: true) }
           Button("Export App Stats as CSV…") { store.exportCSV() }
         } label: {
-          Image(systemName: "square.and.arrow.up")
-        }.menuStyle(.borderlessButton).frame(width: 20).help("Export")
+          exportIcon
+        }.menuStyle(.borderlessButton).menuIndicator(.hidden)
+          .frame(width: 20, height: 20).accessibilityLabel("Export").help("Export")
       }
       Button {
         store.settingsVisible = true
@@ -116,6 +117,12 @@ struct DashboardView: View {
       }.help("Settings")
     }.buttonStyle(.plain).foregroundStyle(Color.muted).padding(.horizontal, 26).frame(height: 35)
       .overlay(alignment: .top) { Rectangle().fill(Color.white.opacity(0.035)).frame(height: 1) }
+  }
+
+  private var exportIcon: some View {
+    Image(systemName: "square.and.arrow.up")
+      .font(.system(size: 12))
+      .frame(width: 20, height: 20)
   }
   private var overview: some View {
     let s = store.snapshot
