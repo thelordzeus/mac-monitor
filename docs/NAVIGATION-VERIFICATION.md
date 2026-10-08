@@ -1,4 +1,16 @@
-# Mac Pulse 1.5.1 navigation verification
+# Mac Pulse 1.5.2 navigation verification
+
+Checked on 9 October 2026 using the release build and real Mac readings.
+
+- `./scripts/build.sh` compiled and verified the signed 1.5.2 app (build 12).
+- `./scripts/test-cleanup.sh --filter PulseCoreTests` passed all 10 remaining alert observation and storage tests.
+- Dashboard images were rendered for all 12 remaining tabs at 1080 and 2100 points. Overview and Storage growth were visually inspected at minimum width; Overview was inspected at wide width. Compact icons and full labels both fit.
+- The native app confirmed version 1.5.2. Its header, All tabs menu and Settings → Layout each exposed the same 12 tabs, with Insights and Connectivity absent. Selecting Storage growth from All tabs opened its existing map and saved scan.
+- Dashboard indicators and the alert rule engine remain in place. Only the dedicated Insights observation pass and connection-check feature were removed.
+- Saved tab names are loaded through `MonitorTab.init(rawValue:)`; retired names are discarded while remaining order and hidden-tab preferences are retained. No preferences were reset during verification.
+- The monitoring gallery and native Storage growth screenshot were refreshed. Older Cleanup workflow and settings screenshots remain examples of those unchanged tools.
+
+## Previous 1.5.1 layout checks
 
 Checked on 9 October 2026 using the release build and live Mac readings.
 

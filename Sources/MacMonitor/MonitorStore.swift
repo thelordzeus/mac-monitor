@@ -14,10 +14,7 @@ struct MonitorAlert: Identifiable {
 }
 final class MonitorStore: ObservableObject {
   @MainActor lazy var storageTracking = StorageGrowthModel()
-  @MainActor lazy var connectivity = ConnectivityModel()
-  @Published var alertSettingsRequested = false
   @Published var menuPanelTab: MonitorTab?
-  @Published var insights: [ResourceFinding] = []
   @Published var alertRules: [AlertRule] = {
     UserDefaults.standard.data(forKey: "alertRules").flatMap { try? JSONDecoder().decode([AlertRule].self, from: $0) } ?? AlertRule.defaults
   }() { didSet { UserDefaults.standard.set(try? JSONEncoder().encode(alertRules), forKey: "alertRules"); ruleEngine.reset() } }
@@ -31,8 +28,6 @@ final class MonitorStore: ObservableObject {
     didSet { UserDefaults.standard.set(floatingDashboard, forKey: "floatingDashboard") }
   }
   private var ruleEngine = ObservationEngine()
-  private var insightEngine = ObservationEngine()
-  private let insightRules = AlertRule.defaults
   @Published var snapshot = Snapshot()
   @Published var selectedTab = MonitorTab.overview
   @Published var samples: [Sample] = []
@@ -44,7 +39,7 @@ final class MonitorStore: ObservableObject {
   }
   @Published var paused = false {
     didSet {
-      if oldValue != paused { ruleEngine.reset(); insightEngine.reset(); insights = []; queue.async { self.collector.resetBaselines() } }
+      if oldValue != paused { ruleEngine.reset(); queue.async { self.collector.resetBaselines() } }
     }
   }
   @Published var selectedApp: AppStat?
@@ -136,7 +131,7 @@ final class MonitorStore: ObservableObject {
     if let raw = UserDefaults.standard.stringArray(forKey: "tabOrder") {
       tabOrder = raw.compactMap(MonitorTab.init(rawValue:))
     }
-    // Preserve the user's order when a release adds a new tab.
+    // Ignore retired tabs in saved layouts and preserve the order of remaining tabs.
     var seen = Set<MonitorTab>()
     tabOrder = tabOrder.filter { seen.insert($0).inserted }
     tabOrder += MonitorTab.allCases.filter { !seen.contains($0) }
@@ -300,8 +295,6 @@ final class MonitorStore: ObservableObject {
           cpu: app.cpu / Double(max(1, s.cores)), memory: app.memory, write: app.write,
           network: s.networkAvailable ? app.download + app.upload : .nan)
       })
-    _ = insightEngine.observe(observation, rules: insightRules)
-    insights = insightEngine.findings
     for finding in ruleEngine.observe(observation, rules: alertRules) {
       alert(finding.id, title: finding.title, detail: finding.detail)
     }

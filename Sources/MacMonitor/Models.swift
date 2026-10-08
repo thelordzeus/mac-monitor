@@ -13,9 +13,7 @@ enum MonitorTab: String, CaseIterable, Identifiable, Codable {
   case bluetooth = "Bluetooth"
   case projects = "Projects"
   case cleanup = "Cleanup"
-  case insights = "Insights"
   case storage = "Storage growth"
-  case connectivity = "Connectivity"
   var id: String { rawValue }
   var symbol: String {
     switch self {
@@ -30,9 +28,7 @@ enum MonitorTab: String, CaseIterable, Identifiable, Codable {
     case .bluetooth: return "antenna.radiowaves.left.and.right"
     case .projects: return "folder"
     case .cleanup: return "sparkles"
-    case .insights: return "lightbulb"
     case .storage: return "chart.pie"
-    case .connectivity: return "network"
     }
   }
   var color: Color {
@@ -47,9 +43,7 @@ enum MonitorTab: String, CaseIterable, Identifiable, Codable {
     case .bluetooth: return Color(hex: 0x16b7d6)
     case .projects: return Color(hex: 0xe76529)
     case .cleanup: return Color(hex: 0x34c6a5)
-    case .insights: return Color(hex: 0x9787ed)
     case .storage: return Color(hex: 0xdfa000)
-    case .connectivity: return Color(hex: 0x13aa81)
     }
   }
 }

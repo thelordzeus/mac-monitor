@@ -685,9 +685,7 @@ struct SettingsView: View {
         }.padding(20).frame(maxWidth: .infinity, alignment: .leading).background(
           Color.surface, in: RoundedRectangle(cornerRadius: 15))
       }.frame(height: 455)
-    }.padding(24).frame(width: 660).background(Color.window).preferredColorScheme(.dark).onAppear {
-      if store.alertSettingsRequested { section = "Alerts"; store.alertSettingsRequested = false }
-    }
+    }.padding(24).frame(width: 660).background(Color.window).preferredColorScheme(.dark)
       .environmentObject(store)
   }
   private func settingsRow<C: View>(_ title: String, @ViewBuilder control: () -> C) -> some View {

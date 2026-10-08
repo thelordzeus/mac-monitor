@@ -39,9 +39,7 @@ import SwiftUI
       case .sound: SoundView(store: store, exporting: exporting)
       case .bluetooth: BluetoothView(store: store)
       case .projects: ProjectsView(store: store)
-      case .insights: InsightsView(store: store)
       case .storage: StorageGrowthView(model: store.storageTracking)
-      case .connectivity: ConnectivityView(store: store, model: store.connectivity)
       default: metricDetail
       }
     }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 20)

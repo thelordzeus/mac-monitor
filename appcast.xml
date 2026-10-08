@@ -6,6 +6,27 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>Mac Pulse</title>
         <item>
+            <title>1.5.2</title>
+            <pubDate>Fri, 09 Oct 2026 01:21:43 +0530</pubDate>
+            <link>https://github.com/thelordzeus/mac-monitor/releases/tag/v1.5.2</link>
+            <sparkle:version>12</sparkle:version>
+            <sparkle:shortVersionString>1.5.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.2</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description sparkle:format="markdown"><![CDATA[# Mac Pulse 1.5.2
+
+- Removed the Insights and Connectivity tabs to simplify navigation. System readings, pressure indicators and configurable alert rules remain available in the dashboard and Settings.
+- Removed the unused Insights processing and on-demand connection-check code.
+- Existing tab layouts retain their order and hidden-tab choices for the remaining tabs. Retired tabs are ignored when loading older preferences.
+- Updated the README and monitoring screenshots to show the current navigation.
+
+Existing monitoring history, storage snapshots, alert rules and Cleanup state are retained.
+
+Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free ad hoc signing and is not Apple-notarized.
+]]></description>
+            <enclosure url="https://github.com/thelordzeus/mac-monitor/releases/download/v1.5.2/Mac-Pulse-arm64.zip" length="4544522" type="application/octet-stream" sparkle:edSignature="yANThZ6dCJ9IiEdejvvoJFN8o6Pyd4Z5X0Hrq/7KZ/adZZbFgs1jyGE1ZPymBhI2qK6DJrAAPBoxtRy9iVVNBw=="/>
+        </item>
+        <item>
             <title>1.5.1</title>
             <pubDate>Fri, 09 Oct 2026 01:09:35 +0530</pubDate>
             <link>https://github.com/thelordzeus/mac-monitor/releases/tag/v1.5.1</link>
@@ -74,6 +95,6 @@ Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free 
     </channel>
 </rss>
 <!-- sparkle-signatures:
-edSignature: oIFHjRso2e1FbAaVE2LM9U4Iz3fTAhPqoNtd2aLaPvzLaR+KtMmUCWSc+QRzYkpJYUcy736jg+5vJ4UdWudbCQ==
-length: 6238
+edSignature: ZfvNrvoUmmiSu3vqOol1BtG+FM8+L4UfIyXU2+e4JqcXw3DSLf7XN5difZtMUCULpG/jU9aaKnXO6XsvXNSmDw==
+length: 7815
 -->

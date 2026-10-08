@@ -28,9 +28,7 @@ The top navigation adapts to the window width: full labels on wider windows, and
 | **Sound** | Choose an output, adjust supported system volume, see playing/silent status, and adjust or mute each app through Core Audio process taps. |
 | **Bluetooth** | Connected/paired devices and reported battery levels, including earbud/case readings when macOS supplies them. |
 | **Projects** | Runtimes grouped by working directory, listening ports, observed CPU inactivity and confirmed process termination. |
-| **Insights** | Findings from sustained app load, ten-minute memory growth, pressure, low free disk space and available temperature readings. Open a finding to inspect its readings. |
 | **Storage growth** | Save folder-size snapshots, compare complete scans and explore a clickable storage map. |
-| **Connectivity** | Run DNS, latency, packet-loss and HTTPS checks on demand. |
 
 ## Clean up and regain control
 
@@ -58,11 +56,7 @@ In **Inventory → Caches**, tick individual rows or select all caches matching 
 
 Scans can be incomplete because of permissions, changing volumes or scan budgets; the interface reports those limits. Scanned sizes differ from actual free-space gains. Dashboard image export shows the Cleanup tools overview; individual scan results remain in the interactive views.
 
-## Understand problems and storage growth
-
-**Insights** explains sustained CPU, disk or network activity, ten-minute app memory growth, elevated memory pressure, low disk space and high CPU temperature when a sensor is available. Each finding opens its relevant chart or app. Gaps caused by pause, sleep or missed collection reset sustained observations; an app restart resets its memory baseline. Findings describe measurements, rather than claiming to diagnose their cause. The view also shows Mac Pulse's own CPU and memory usage.
-
-![Insights with system context and observed findings](artifacts/screenshots/insights.png)
+## Track storage growth and configure alerts
 
 In **Storage growth**, add folders you want to watch and choose **Scan folder** to save a baseline. Scan again later and choose an earlier complete scan to see additions, growth and removals. Click a tile in the storage map to reveal its item in Finder. Scans measure allocated bytes, skip links and other volumes, and stop after 200,000 entries or 30 seconds. Partial scans are labeled and excluded from growth comparisons. Up to 300 snapshots from the last 90 days stay in `~/Library/Application Support/MacMonitor/storage-growth.json`. Scans run only when requested.
 
@@ -71,10 +65,6 @@ In **Storage growth**, add folders you want to watch and choose **Scan folder** 
 **Settings → Alerts** lets you add, disable or remove rules; choose a metric, threshold, observed duration and optional app. Rules cover CPU, ten-minute memory growth, disk writes, network traffic, disk availability, memory pressure and CPU temperature. CPU thresholds always mean a percentage of the whole Mac; rates use decimal MB/s. Quiet hours suppress system notifications while retaining the in-app alert list. Notifications are optional and repeated rule/app alerts are limited to once every 30 minutes.
 
 ![Configurable alert rules, app selection and quiet hours](artifacts/screenshots/alert-rules.png)
-
-**Connectivity** checks a hostname or IP address using five ICMP probes and a DNS lookup, alongside Apple's HTTPS connectivity endpoint. Results show latency, packet loss, DNS answers and the HTTPS response. Checks run when you click **Run checks** and contact the entered host, your configured DNS resolver and Apple. A blocked ICMP response alone does not establish that the internet is down.
-
-![On-demand DNS, latency, packet-loss and HTTPS checks](artifacts/screenshots/connectivity.png)
 
 ## Review app files and restore cleanup
 
@@ -260,7 +250,7 @@ python3 scripts/verify-metrics.py
 
 For layout checks, the renderer also accepts `--width` and `--height`, for example `--render /tmp/mac-pulse-small --width 1080 --height 890`. Sizes are limited to the app's minimum window size and a maximum of 4096 points.
 
-The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. The Swift tests also cover observation gaps/restarts, quiet hours, partial folder scans, storage-map proportions, network parsing, app-file fingerprints and restore conflicts. See [1.5.0 feature verification](docs/FEATURES-VERIFICATION.md) for the test results and native checks. `--render` produces the monitoring screenshots, Cleanup landing page and floating dashboard from real Mac readings; it does not inject simulated statistics.
+The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. The Swift tests also cover observation gaps/restarts, quiet hours, partial folder scans, storage-map proportions, app-file fingerprints and restore conflicts. See [1.5.0 feature verification](docs/FEATURES-VERIFICATION.md) for the test results and native checks. `--render` produces the monitoring screenshots, Cleanup landing page and floating dashboard from real Mac readings; it does not inject simulated statistics.
 
 ## Credits
 

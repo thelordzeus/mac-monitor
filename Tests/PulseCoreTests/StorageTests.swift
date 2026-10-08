@@ -4,7 +4,7 @@ import Testing
 
 @testable import PulseCore
 
-struct StorageAndNetworkTests {
+struct StorageTests {
   @Test func storageComparisonIncludesNewRemovedAndChangedPathsAndRejectsPartial() {
     let old = StorageSnapshot(
       root: "/root",
@@ -73,24 +73,5 @@ struct StorageAndNetworkTests {
     for scan in [old, baseline, partial, current] { history.record(scan) }
     #expect(history.snapshots.count == 3)
     #expect(history.previous(to: current)?.id == baseline.id)
-  }
-  @Test func hostValidationPreventsCommandOptionsAndURLs() {
-    for host in ["apple.com", "1.1.1.1", "localhost", "::1", "2001:4860:4860::8888"] {
-      #expect(NetworkDiagnostics.validHost(host))
-    }
-    for host in [
-      "-c", "https://apple.com", "apple.com; touch x", "a b", "a..com", "", "-host.com",
-      "host-.com", "a\n.com",
-    ] { #expect(!NetworkDiagnostics.validHost(host)) }
-  }
-  @Test func pingParsingDistinguishesLossLatencyAndMissingReplies() {
-    let stats = NetworkDiagnostics.pingStatistics(
-      "5 packets transmitted, 4 packets received, 20.0% packet loss\nround-trip min/avg/max/stddev = 1.100/2.200/3.300/0.5 ms"
-    )
-    #expect(stats.loss == 20 && stats.latency == 2.2)
-    let missing = NetworkDiagnostics.pingStatistics(
-      "5 packets transmitted, 0 packets received, 100.0% packet loss")
-    #expect(missing.loss == 100 && missing.latency == nil)
-    #expect(NetworkDiagnostics.pingStatistics("could not resolve host").loss == nil)
   }
 }

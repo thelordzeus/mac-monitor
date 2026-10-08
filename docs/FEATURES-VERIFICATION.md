@@ -1,5 +1,7 @@
 # Mac Pulse 1.5.0 verification
 
+These are historical checks for 1.5.0. Insights and Connectivity were removed in 1.5.2; the remaining alert rules and storage tools continue to use their verified core behavior.
+
 Validated on an Apple M4 Mac on 8 October 2026. The screenshots use real readings and scan results. The floating dashboard image comes from the app's renderer with live samples.
 
 ## Automated checks
