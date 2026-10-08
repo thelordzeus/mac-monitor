@@ -27,9 +27,7 @@ struct InventoryCacheActivity: Sendable {
 struct InventoryCacheCleaner: Sendable {
   let home: String
   var checkOpenFiles: @Sendable (String) throws -> Void = { try Self.nativeOpenFileCheck($0) }
-  var moveToTrash: @Sendable (String) throws -> Void = { path in
-    try FileManager.default.trashItem(at: URL(fileURLWithPath: path), resultingItemURL: nil)
-  }
+  var moveToTrash: (@Sendable (String) throws -> Void)? = nil
 
   func supports(_ path: String) -> Bool {
     let parent = URL(fileURLWithPath: path).deletingLastPathComponent().path
@@ -70,10 +68,12 @@ struct InventoryCacheCleaner: Sendable {
     try validate(candidate.cache)
     try checkOpenFiles(candidate.id)
     let before = CleanupVolume.read(candidate.id)
-    try moveToTrash(candidate.id)
+    let receipt: TrashRecord?
+    if let moveToTrash { try moveToTrash(candidate.id); receipt = nil }
+    else { receipt = try TrashRecovery.trash(candidate.id) }
     return .init(id: UUID().uuidString, date: .now,
       title: "Moved \(candidate.owner.name) cache to Trash", paths: [candidate.id],
-      before: before, after: before.flatMap { CleanupVolume.read($0.path) }, bytes: current.bytes)
+      before: before, after: before.flatMap { CleanupVolume.read($0.path) }, bytes: current.bytes, recovery: receipt.map { [$0] })
   }
 
   private static func nativeOpenFileCheck(_ path: String) throws {

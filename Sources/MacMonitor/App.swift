@@ -73,6 +73,8 @@ struct WindowSetup: NSViewRepresentable {
 }
 final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
   private var item: NSStatusItem?
+  private var metricItems: [MonitorTab: NSStatusItem] = [:]
+  private var floatingPanel: NSPanel?
   private var popover = NSPopover()
   private var store: MonitorStore?
   private var subscription: AnyCancellable?
@@ -86,6 +88,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
   func applicationWillTerminate(_ notification: Notification) {
     stopDismissalMonitoring()
+    floatingPanel?.orderOut(nil)
     store?.flushHistory()
     store?.stopCleanup()
   }
@@ -135,16 +138,62 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
       systemSymbolName: s.pressure == "Critical" ? "exclamationmark.triangle" : "waveform.path.ecg",
       accessibilityDescription: AppIdentity.name)
     item?.button?.imagePosition = .imageLeft
-    item?.button?.title = parts.isEmpty ? "" : " " + parts.joined(separator: "  ")
+    let metrics = store.independentMenuItems ? store.menuMetrics.intersection([.cpu, .memory, .gpu, .network, .disk, .battery]) : []
+    for tab in Array(metricItems.keys) where !metrics.contains(tab) {
+      if let old = metricItems.removeValue(forKey: tab) { NSStatusBar.system.removeStatusItem(old) }
+    }
+    for tab in MonitorTab.allCases where metrics.contains(tab) {
+      if metricItems[tab] == nil {
+        let separate = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        separate.button?.target = self; separate.button?.action = #selector(toggleMetric(_:))
+        separate.button?.tag = MonitorTab.allCases.firstIndex(of: tab) ?? 0
+        metricItems[tab] = separate
+      }
+      let summary = Summary.make(tab, store: store)
+      metricItems[tab]?.button?.image = NSImage(systemSymbolName: tab.symbol, accessibilityDescription: tab.rawValue)
+      metricItems[tab]?.button?.imagePosition = .imageLeft
+      metricItems[tab]?.button?.title = " " + summary.value + " " + summary.unit
+      metricItems[tab]?.button?.font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .regular)
+      metricItems[tab]?.button?.toolTip = "Mac Pulse · " + tab.rawValue
+    }
+    item?.button?.title = store.independentMenuItems || parts.isEmpty ? "" : " " + parts.joined(separator: "  ")
+    updateFloatingPanel()
     item?.button?.font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .regular)
   }
   @objc private func toggle() {
     guard let button = item?.button else { return }
-    if popover.isShown {
-      popover.performClose(nil)
-    } else {
-      popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    showPopover(button, tab: nil)
+  }
+  @objc private func toggleMetric(_ button: NSStatusBarButton) {
+    guard MonitorTab.allCases.indices.contains(button.tag) else { return }
+    showPopover(button, tab: MonitorTab.allCases[button.tag])
+  }
+  private func showPopover(_ button: NSStatusBarButton, tab: MonitorTab?) {
+    let closeOnly = popover.isShown && store?.menuPanelTab == tab
+    popover.performClose(nil)
+    guard !closeOnly else { return }
+    store?.menuPanelTab = tab
+    popover.contentSize = NSSize(width: 420, height: tab == nil ? 580 : 440)
+    popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+  }
+  private func updateFloatingPanel() {
+    guard let store else { return }
+    if !store.floatingDashboard { floatingPanel?.orderOut(nil); return }
+    if floatingPanel == nil {
+      let panel = NSPanel(contentRect: NSRect(x: 180, y: 180, width: 340, height: 230),
+        styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+      panel.title = "Mac Pulse floating dashboard"
+      panel.level = .floating; panel.isMovableByWindowBackground = true
+      panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+      panel.hidesOnDeactivate = false; panel.isReleasedWhenClosed = false
+      panel.isExcludedFromWindowsMenu = false
+      panel.backgroundColor = .clear; panel.isOpaque = false; panel.hasShadow = true
+      panel.contentView = NSHostingView(rootView: FloatingDashboard(store: store, open: { [weak self] in self?.openWindow() }))
+      panel.setFrameAutosaveName("MacPulseFloatingDashboard")
+      panel.setFrameUsingName("MacPulseFloatingDashboard")
+      floatingPanel = panel
     }
+    if floatingPanel?.isVisible == false { floatingPanel?.orderFrontRegardless() }
   }
   func popoverDidShow(_ notification: Notification) {
     stopDismissalMonitoring()
@@ -162,6 +211,7 @@ final class MonitorAppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelega
         }
       } else if event.window !== self.popover.contentViewController?.view.window
         && event.window !== self.item?.button?.window
+        && !self.metricItems.values.contains(where: { event.window === $0.button?.window })
       {
         self.popover.performClose(nil)
       }
@@ -201,6 +251,9 @@ struct MenuDashboard: View {
         Text("Up \(Format.duration(store.snapshot.uptime))").font(.system(size: 10))
           .foregroundStyle(Color.muted)
       }
+      if let tab = store.menuPanelTab {
+        MenuMetricDetail(store: store, tab: tab, open: open)
+      } else {
       LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
         ForEach([MonitorTab.cpu, .memory, .gpu, .disk, .network, .battery]) { tab in
           let summary = Summary.make(tab, store: store)
@@ -242,6 +295,7 @@ struct MenuDashboard: View {
             ).foregroundStyle(Color.muted)
           }
         }.buttonStyle(.plain)
+      }
       }
       Divider()
       Button("Check for Updates…", action: checkForUpdates)

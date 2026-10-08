@@ -42,7 +42,7 @@ public struct CleanupMetrics {
 enum CleanupSection: String, CaseIterable, Identifiable {
   case cleanup = "Cleanup", browse = "Browse", inventory = "Inventory"
   case files = "Files & media", recovery = "Revive apps", memory = "AI & apps"
-  case projects = "Projects", setup = "Setup"
+  case projects = "Projects", receipts = "History", setup = "Setup"
   var id: Self { self }
   var symbol: String {
     switch self {
@@ -53,6 +53,7 @@ enum CleanupSection: String, CaseIterable, Identifiable {
     case .recovery: "waveform.path.ecg"
     case .memory: "memorychip"
     case .projects: "terminal"
+    case .receipts: "clock.arrow.circlepath"
     case .setup: "gearshape"
     }
   }
@@ -222,6 +223,8 @@ public struct MacMonitorCleanupView: View {
           processes: workspace.processes)
       case .projects:
         WorkspaceProjectsView(processes: workspace.processes, controller: workspace.projects)
+      case .receipts:
+        CleanupReceiptsView(model: workspace.storage.overview)
       case .setup:
         CleanupSetupView(workspace: workspace)
       }

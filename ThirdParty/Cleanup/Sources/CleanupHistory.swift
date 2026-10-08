@@ -31,6 +31,7 @@ struct CleanupWin: Codable, Equatable, Identifiable, Sendable {
   let after: CleanupVolume?
   /// Folder size measured before removal, when known.
   var bytes: UInt64? = nil
+  var recovery: [TrashRecord]? = nil
 
   var measuredGain: UInt64? {
     guard let before, let after, before.path == after.path else { return nil }
@@ -42,7 +43,18 @@ struct CleanupLedger: Codable, Equatable, Sendable {
   var wins: [CleanupWin] = []
 
   mutating func record(_ win: CleanupWin) {
-    guard !win.paths.isEmpty, !wins.contains(where: { $0.id == win.id }) else { return }
+    guard !win.paths.isEmpty else { return }
+    if let index = wins.firstIndex(where: { $0.id == win.id }) {
+      if let incoming = win.recovery, var existing = wins[index].recovery {
+        for i in existing.indices {
+          if let restored = incoming.first(where: { $0.id == existing[i].id && $0.originalPath == existing[i].originalPath && $0.inode == existing[i].inode })?.restoredAt {
+            existing[i].restoredAt = restored
+          }
+        }
+        wins[index].recovery = existing
+      }
+      return
+    }
     wins.append(win)
     wins.sort { $0.date > $1.date }
     wins = Array(wins.prefix(1_000))

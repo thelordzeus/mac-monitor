@@ -1,10 +1,12 @@
 import AppKit
 import SwiftUI
 
-struct MacStorageInventoryView: View {
+@MainActor struct MacStorageInventoryView: View {
   @ObservedObject var model: StorageBreakdownModel
   @ObservedObject private var caches: InventoryCacheModel
   let onBrowse: (String) -> Void
+  @StateObject private var leftovers = AppLeftoverModel()
+  @State private var showsLeftovers = false
   @State private var query = ""
   @State private var showingAll: Set<String> = []
   @State private var pendingApp: StorageItem?
@@ -110,6 +112,7 @@ struct MacStorageInventoryView: View {
         }
       }.padding(PulseUI.pagePadding)
     }
+    .sheet(isPresented: $showsLeftovers) { AppLeftoversView(model: leftovers, history: model.overview, finished: { model.scan() }) }
     .task { refreshCacheOwners(); model.scanIfNeeded() }
     .onChange(of: model.categories) { _, _ in refreshCacheOwners() }
     .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -254,6 +257,7 @@ struct MacStorageInventoryView: View {
         Button("Browse") { onBrowse(item.path) }.pulseButton(.secondary).controlSize(.small)
       } else if category.id == "computer-applications", canTrash(item) {
         Menu {
+          Button("Review app and associated files…") { showsLeftovers = true; leftovers.scan(item.path) }
           Button("Move app to Trash…", role: .destructive) { pendingApp = item }
         } label: {
           Image(systemName: "ellipsis")
@@ -296,7 +300,9 @@ struct MacStorageInventoryView: View {
       return
     }
     do {
-      try FileManager.default.trashItem(at: URL(fileURLWithPath: item.path), resultingItemURL: nil)
+      let before = CleanupVolume.read(item.path)
+      let receipt = try TrashRecovery.trash(item.path)
+      model.overview.record(.init(id: UUID().uuidString, date: .now, title: "Moved \(item.name) to Trash", paths: [item.path], before: before, after: before.flatMap { CleanupVolume.read($0.path) }, bytes: item.bytes, recovery: receipt.map { [$0] }))
       status = .init(
         text: "\(item.name) moved to Trash. Empty Trash to reclaim space.", tone: .working)
       model.scan()

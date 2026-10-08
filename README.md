@@ -26,6 +26,9 @@ See what is using your Mac's resources, with live readings, app rankings and loc
 | **Sound** | Choose an output, adjust supported system volume, see playing/silent status, and adjust or mute each app through Core Audio process taps. |
 | **Bluetooth** | Connected/paired devices and reported battery levels, including earbud/case readings when macOS supplies them. |
 | **Projects** | Runtimes grouped by working directory, listening ports, observed CPU inactivity and confirmed process termination. |
+| **Insights** | Findings from sustained app load, ten-minute memory growth, pressure, low free disk space and available temperature readings. Open a finding to inspect its readings. |
+| **Storage growth** | Save folder-size snapshots, compare complete scans and explore a clickable storage map. |
+| **Connectivity** | Run DNS, latency, packet-loss and HTTPS checks on demand. |
 
 ## Clean up and regain control
 
@@ -37,11 +40,12 @@ Open **Cleanup** or press **⌘⇧K** for the storage and app recovery workspace
 | --- | --- |
 | **Cleanup** | Review old caches/reports, inactive dependencies with an exact reinstall lock, generated builds, simulators, Docker rebuildable storage and merged Git worktrees. |
 | **Browse** | Explore folders and mounted drives with measured sizes, scan progress and Finder shortcuts. |
-| **Inventory** | Inspect storage, identify caches by their app names/icons, select multiple caches and move them to Trash after review. |
+| **Inventory** | Inspect storage, identify caches by their app names/icons, select multiple caches, or review an app and files matched to its bundle ID before moving selected items to Trash. |
 | **Files & media** | Review large files, verify exact duplicates and export smaller media copies while keeping originals. Export requires an existing `ffmpeg`/`ffprobe` installation. |
 | **Revive apps** | Check app health, try recovery, or choose normal quit and reviewed force quit. |
 | **AI & apps** | Inspect supported AI threads and app/process memory. |
 | **Projects** | Pause/resume or explicitly stop selected processes, save start commands and optionally enable pressure policies. Pausing a process still holds its RAM. |
+| **History** | Read cleanup receipts with exact paths, selected size and measured free-space change; restore tracked items still in Trash. |
 | **Setup** | Review optional Full Disk Access/Accessibility permissions and add project folders. |
 
 Opening a tool starts its scan; the landing page does not scan your disk. Removal requires review/confirmation, and the engines recheck file/process identity and activity. Personal-file removal and manually selected Inventory caches use Trash. The Cleanup tool's eligible old caches and developer artifacts are removed permanently after confirmation. Docker containers and volumes are preserved.
@@ -51,6 +55,40 @@ In **Inventory → Caches**, tick individual rows or select all caches matching 
 ![Inventory cache list with associated app icons, multiple checked rows and a selected count/size action bar](artifacts/screenshots/inventory-caches.jpg)
 
 Scans can be incomplete because of permissions, changing volumes or scan budgets; the interface reports those limits. Scanned sizes differ from actual free-space gains. Dashboard image export shows the Cleanup tools overview; individual scan results remain in the interactive views.
+
+## Understand problems and storage growth
+
+**Insights** explains sustained CPU, disk or network activity, ten-minute app memory growth, elevated memory pressure, low disk space and high CPU temperature when a sensor is available. Each finding opens its relevant chart or app. Gaps caused by pause, sleep or missed collection reset sustained observations; an app restart resets its memory baseline. Findings describe measurements, rather than claiming to diagnose their cause. The view also shows Mac Pulse's own CPU and memory usage.
+
+![Insights with system context and observed findings](artifacts/screenshots/insights.png)
+
+In **Storage growth**, add folders you want to watch and choose **Scan folder** to save a baseline. Scan again later and choose an earlier complete scan to see additions, growth and removals. Click a tile in the storage map to reveal its item in Finder. Scans measure allocated bytes, skip links and other volumes, and stop after 200,000 entries or 30 seconds. Partial scans are labeled and excluded from growth comparisons. Up to 300 snapshots from the last 90 days stay in `~/Library/Application Support/MacMonitor/storage-growth.json`. Scans run only when requested.
+
+![Storage growth with a clickable folder map and scan comparisons](artifacts/screenshots/storage-growth.png)
+
+**Settings → Alerts** lets you add, disable or remove rules; choose a metric, threshold, observed duration and optional app. Rules cover CPU, ten-minute memory growth, disk writes, network traffic, disk availability, memory pressure and CPU temperature. CPU thresholds always mean a percentage of the whole Mac; rates use decimal MB/s. Quiet hours suppress system notifications while retaining the in-app alert list. Notifications are optional and repeated rule/app alerts are limited to once every 30 minutes.
+
+![Configurable alert rules, app selection and quiet hours](artifacts/screenshots/alert-rules.png)
+
+**Connectivity** checks a hostname or IP address using five ICMP probes and a DNS lookup, alongside Apple's HTTPS connectivity endpoint. Results show latency, packet loss, DNS answers and the HTTPS response. Checks run when you click **Run checks** and contact the entered host, your configured DNS resolver and Apple. A blocked ICMP response alone does not establish that the internet is down.
+
+![On-demand DNS, latency, packet-loss and HTTPS checks](artifacts/screenshots/connectivity.png)
+
+## Review app files and restore cleanup
+
+In **Cleanup → Inventory → Apps**, open an app's **… → Review app and associated files…** menu. Review the app bundle and exact bundle-ID matches in Caches, Preferences, Application Support and Saved Application State. Only the app bundle is selected initially. Support data can contain profiles or personal app data; select it explicitly after review. Shared containers, app groups and ambiguous app-name matches are excluded. Quit the app before removal. Changed files, incomplete measurements and open files block the affected action.
+
+![Review app files and choose the exact items to move to Trash](artifacts/screenshots/app-leftovers.png)
+
+**Cleanup → History** records exact paths, selected size where measured and the observed free-space change. Trash actions from Inventory, Browse and Files & media record restore locations when macOS provides them. Choose **Restore…** to return a tracked item to its original folder. Restore verifies the item's identity and original parent and never overwrites an existing file. Access to protected Trash locations or original folders may require **Full Disk Access**, available through **Cleanup → Setup**; denied access leaves the item in Trash and displays an explanation. Items already emptied from Trash, changed items, permanently removed artifacts and older receipts without tracking cannot be restored. Moving an item to Trash does not immediately reclaim disk space.
+
+![Cleanup receipts and restore controls for tracked Trash items](artifacts/screenshots/cleanup-history.png)
+
+## Keep readings in view
+
+In **Settings → Menu Bar**, enable **Separate movable menu-bar items** for selected metric readouts. Each opens its metric chart; hold **⌘** and drag to move them using macOS menu-bar positioning. The main icon still opens the compact dashboard. Enable **Show floating dashboard** for a small movable panel that stays above other windows and opens metric details with a click. Its position is remembered; close it with its × button.
+
+![Movable floating dashboard with six live readings](artifacts/screenshots/floating-dashboard.png)
 
 ## Download and install
 
@@ -81,9 +119,9 @@ Updates use [Sparkle](https://sparkle-project.org/) with signed feeds and Ed2551
 
 ## Everyday tools
 
-- **Menu bar:** choose live readouts and open a compact dashboard. Monitoring continues when you close the main window; use Quit to stop the app.
+- **Menu bar:** choose combined or independent movable readouts, open focused metric panels, or enable a floating dashboard. Monitoring continues when you close the main window; use Quit to stop the app.
 - **History:** recent live readings plus 1-hour, 12-hour, 24-hour, 7-day and 30-day ranges. App detail sheets include per-app history.
-- **Alerts:** sustained CPU use, memory growth, heavy disk writes and network traffic. System notifications are optional.
+- **Alerts:** configurable thresholds, app selection, observed durations and quiet hours. System notifications are optional.
 - **App controls:** search, pin apps, include system processes, inspect processes and confirm graceful or forced termination.
 - **Export:** save/copy a dashboard PNG or export app statistics as CSV.
 - **Customization:** reorder/hide tabs and overview cards, choose refresh interval, Celsius/Fahrenheit and network bits/bytes, and enable launch at login.
@@ -204,7 +242,7 @@ History is stored in `~/Library/Application Support/MacMonitor/history.sqlite`. 
 
 ## Limits
 
-Sensor and device support varies by Mac. Manual fan control, a full localization set and independent draggable menu-bar items are not included. Selected menu-bar readings share one movable item. Some protected processes cannot be fully inspected or terminated without further privileges.
+Sensor and device support varies by Mac. Manual fan control and a full localization set are not included. Menu-bar items can be combined or moved independently. Some protected processes cannot be fully inspected or terminated without further privileges.
 
 The build and core statistics/history checks were validated on an Apple M4 Mac. Per-app audio mixing is implemented but has not been tested end to end. Intel Macs and every possible battery/Bluetooth device have not been tested.
 
@@ -218,7 +256,7 @@ python3 scripts/verify-metrics.py
 "dist/Mac Pulse.app/Contents/MacOS/MacMonitor" --render artifacts/screenshots
 ```
 
-The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. `--render` produces the monitoring screenshots and Cleanup landing page from real Mac readings; it does not inject simulated statistics.
+The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. The Swift tests also cover observation gaps/restarts, quiet hours, partial folder scans, storage-map proportions, network parsing, app-file fingerprints and restore conflicts. See [1.5.0 feature verification](docs/FEATURES-VERIFICATION.md) for the test results and native checks. `--render` produces the monitoring screenshots, Cleanup landing page and floating dashboard from real Mac readings; it does not inject simulated statistics.
 
 ## Credits
 

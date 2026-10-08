@@ -484,7 +484,7 @@ struct SettingsView: View {
         }.keyboardShortcut(.cancelAction)
       }
       Picker("Section", selection: $section) {
-        ForEach(["General", "Layout", "Menu Bar", "Sensors", "Updates"], id: \.self) { Text($0) }
+        ForEach(["General", "Layout", "Menu Bar", "Sensors", "Alerts", "Updates"], id: \.self) { Text($0) }
       }.pickerStyle(.segmented)
       ScrollView {
         VStack(alignment: .leading, spacing: 18) {
@@ -527,6 +527,8 @@ struct SettingsView: View {
             Text("\(AppIdentity.name) · Version \(AppIdentity.version)\nSystem monitoring and cleanup for your Mac.").font(
               .system(size: 12)
             ).foregroundStyle(Color.muted).padding(.top, 12)
+          } else if section == "Alerts" {
+            AlertRulesView(store: store)
           } else if section == "Updates" {
             HStack(spacing: 12) {
               Image(systemName: "arrow.triangle.2.circlepath")
@@ -629,6 +631,9 @@ struct SettingsView: View {
             }
             Button("Reset Layout") { store.resetLayout() }
           } else if section == "Menu Bar" {
+            Toggle("Separate movable menu-bar items", isOn: $store.independentMenuItems)
+            Toggle("Show floating dashboard", isOn: $store.floatingDashboard)
+            Text("Separate items open their own metric panel. Hold ⌘ to move each item. The floating dashboard stays above windows and can be dragged.").font(.system(size: 12)).foregroundStyle(Color.muted)
             Text("Live readouts in the menu bar").font(.system(size: 14, weight: .semibold))
             Text(
               "Click the menu bar readout for a compact dashboard. Hold ⌘ to move it along your menu bar."
@@ -680,7 +685,9 @@ struct SettingsView: View {
         }.padding(20).frame(maxWidth: .infinity, alignment: .leading).background(
           Color.surface, in: RoundedRectangle(cornerRadius: 15))
       }.frame(height: 455)
-    }.padding(24).frame(width: 660).background(Color.window).preferredColorScheme(.dark)
+    }.padding(24).frame(width: 660).background(Color.window).preferredColorScheme(.dark).onAppear {
+      if store.alertSettingsRequested { section = "Alerts"; store.alertSettingsRequested = false }
+    }
       .environmentObject(store)
   }
   private func settingsRow<C: View>(_ title: String, @ViewBuilder control: () -> C) -> some View {

@@ -387,22 +387,23 @@ struct LargeFileReviewView: View {
     moving = true
     let roots = model.reviewRoots
     Task {
-      let message = await Task.detached(priority: .utility) {
+      let result = await Task.detached(priority: .utility) {
         var moved = 0
         var failures: [String] = []
+        var wins: [CleanupWin] = []
         for file in files {
           do {
             for keeper in keepers {
               try ReviewFileDeletion.validateIdentity(.init(file: keeper, roots: roots))
             }
-            try ReviewFileDeletion.trash(.init(file: file, roots: roots))
+            wins.append(try ReviewFileDeletion.trash(.init(file: file, roots: roots)))
             moved += 1
           } catch { failures.append("\(file.name): \(error.localizedDescription)") }
         }
-        return "Moved \(moved) of \(files.count) files to Trash. "
-          + failures.prefix(3).joined(separator: " ")
+        return ("Moved \(moved) of \(files.count) files to Trash. " + failures.prefix(3).joined(separator: " "), wins)
       }.value
-      result = message
+      self.result = result.0
+      for win in result.1 { model.record(win) }
       media.selected = []
       media.invalidateDuplicates()
       duplicateOnly = false

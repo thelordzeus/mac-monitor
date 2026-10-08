@@ -1,8 +1,34 @@
-<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+<?xml version="1.0" standalone="yes"?>
+<!-- sparkle-sign-warning:
 IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
---><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+-->
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>Mac Pulse</title>
+        <item>
+            <title>1.5.0</title>
+            <pubDate>Thu, 08 Oct 2026 20:49:32 +0530</pubDate>
+            <link>https://github.com/thelordzeus/mac-monitor/releases/tag/v1.5.0</link>
+            <sparkle:version>10</sparkle:version>
+            <sparkle:shortVersionString>1.5.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.2</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description sparkle:format="markdown"><![CDATA[# Mac Pulse 1.5.0
+
+- **Insights:** see sustained resource findings with links to the relevant app or chart, plus pressure, swap, available disk and Mac Pulse's own usage.
+- **Storage growth:** track folders with local snapshots, compare complete scans and use a clickable storage map. Partial scans cannot produce misleading growth comparisons.
+- **Alert rules:** configure thresholds, duration and optional app selection, including low disk space, memory pressure and CPU temperature. Set quiet hours for notifications.
+- **Cleanup History:** inspect receipts and restore tracked items still in Trash. Restore verifies identity and the original folder and never overwrites existing files. Protected Trash locations or original folders may require Full Disk Access; denied access is explained and leaves the item in Trash.
+- **App files:** review an app bundle and exact bundle-ID matches for caches, preferences, support data and saved state. Associated files require explicit selection and removal rechecks activity and file identity.
+- **Connectivity:** run DNS, latency, packet-loss and HTTPS checks on demand.
+- **Keep readings visible:** enable independent menu-bar items and a movable floating dashboard from Settings → Menu Bar.
+
+Folder scans and network checks run only when requested. History and preferences stay local. Existing app settings and monitoring/Cleanup history are retained.
+
+Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free ad hoc signing and is not Apple-notarized; macOS may require approval for the first downloaded installation.
+]]></description>
+            <enclosure url="https://github.com/thelordzeus/mac-monitor/releases/download/v1.5.0/Mac-Pulse-arm64.zip" length="4587434" type="application/octet-stream" sparkle:edSignature="byoOgJ9hrPU5qhmu7FgsUSyqXhw2y+3xkAcfAPJ/DoDVXIXWL+bfpYBkS03pc7BaD19SFMSMxPyDnWnUfbBWBA=="/>
+        </item>
         <item>
             <title>1.4.0</title>
             <pubDate>Wed, 07 Oct 2026 23:26:34 +0530</pubDate>
@@ -23,10 +49,11 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
 
 Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free ad hoc signing and is not Apple-notarized; macOS may require approval for the first downloaded installation.
 ]]></description>
-            <enclosure url="https://github.com/thelordzeus/mac-monitor/releases/download/v1.4.0/Mac-Pulse-arm64.zip" length="4251597" type="application/octet-stream" sparkle:edSignature="gjJNcUdPx7gUqR15ea7LeSo9ju+L+KK5IYmm/ORvubz0SjQM4dRnaN7rO6L1ALtUOsr+0mrm3y4IG3/ejJiAAA=="></enclosure>
+            <enclosure url="https://github.com/thelordzeus/mac-monitor/releases/download/v1.4.0/Mac-Pulse-arm64.zip" length="4251597" type="application/octet-stream" sparkle:edSignature="gjJNcUdPx7gUqR15ea7LeSo9ju+L+KK5IYmm/ORvubz0SjQM4dRnaN7rO6L1ALtUOsr+0mrm3y4IG3/ejJiAAA=="/>
         </item>
     </channel>
-</rss><!-- sparkle-signatures:
-edSignature: Tk8YuYQHocic71YdYpRkHPDWwJn+9dO84CJsCTZtABC2X947jC1HKT+zqPGH0jvbZsC1VjbVvKwDJV/3XzQ/Bg==
-length: 2249
+</rss>
+<!-- sparkle-signatures:
+edSignature: S1kDdp4RRGNfEgonbZqhQI3o52MM7QIRKpb0m/cxEdN8FszCACOZKdSaWa5tusRecP46kdGhlI3sav0YwqiSCw==
+length: 4685
 -->

@@ -418,13 +418,18 @@ final class FolderExplorerModel: ObservableObject {
                 URL(fileURLWithPath: entry.path).deletingLastPathComponent().path)
                 == URL(fileURLWithPath: entry.path).deletingLastPathComponent().path
             else { return (entry.path, "\(entry.name) changed. Scan again before removing it.") }
-            try FileManager.default.trashItem(
-              at: URL(fileURLWithPath: entry.path), resultingItemURL: nil)
+            let before = CleanupVolume.read(entry.path)
+            let receipt = try TrashRecovery.trash(entry.path)
+            let win = CleanupWin(id: UUID().uuidString, date: .now, title: "Moved \(entry.name) to Trash", paths: [entry.path], before: before, after: before.flatMap { CleanupVolume.read($0.path) }, bytes: entry.bytes, recovery: receipt.map { [$0] })
+            do {
+              var ledger = CleanupLedger(); ledger.record(win)
+              _ = try CleanupHistoryStore.application.merge(ledger)
+            } catch { return (entry.path, "Moved to Trash, but the receipt could not be saved: \(error.localizedDescription)") }
             return (entry.path, nil)
           } catch { return (entry.path, "\(entry.name): \(error.localizedDescription)") }
         }
       }.value
-      let removed = Set(results.filter { $0.1 == nil }.map(\.0))
+      let removed = Set(results.filter { $0.1 == nil || $0.1?.hasPrefix("Moved to Trash, but") == true }.map(\.0))
       entries.removeAll { removed.contains($0.path) }
       selected.subtract(removed)
       for path in removed { invalidateAncestors(of: path) }

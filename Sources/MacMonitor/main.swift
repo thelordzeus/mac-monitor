@@ -118,6 +118,11 @@ if CommandLine.arguments.contains("--io-worker") {
         try png.write(to: folder.appendingPathComponent(tab.rawValue.lowercased() + ".png"))
       }
     }
+    let floating = ImageRenderer(content: FloatingDashboard(store: store, open: {}).foregroundStyle(.white).frame(width: 340, height: 230))
+    floating.scale = 2
+    if let cgImage = DashboardImage.render(floating), let png = DashboardImage.png(cgImage) {
+      try png.write(to: folder.appendingPathComponent("floating-dashboard.png"))
+    }
     print("Rendered real-metric dashboards to \(folder.path)")
   }
 } else {

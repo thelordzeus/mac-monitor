@@ -4,6 +4,7 @@ import Combine
 import SwiftUI
 import SystemBridge
 import UserNotifications
+import PulseCore
 
 struct MonitorAlert: Identifiable {
   let id = UUID()
@@ -12,6 +13,26 @@ struct MonitorAlert: Identifiable {
   var date = Date()
 }
 final class MonitorStore: ObservableObject {
+  @MainActor lazy var storageTracking = StorageGrowthModel()
+  @MainActor lazy var connectivity = ConnectivityModel()
+  @Published var alertSettingsRequested = false
+  @Published var menuPanelTab: MonitorTab?
+  @Published var insights: [ResourceFinding] = []
+  @Published var alertRules: [AlertRule] = {
+    UserDefaults.standard.data(forKey: "alertRules").flatMap { try? JSONDecoder().decode([AlertRule].self, from: $0) } ?? AlertRule.defaults
+  }() { didSet { UserDefaults.standard.set(try? JSONEncoder().encode(alertRules), forKey: "alertRules"); ruleEngine.reset() } }
+  @Published var quietHours: QuietHours = {
+    UserDefaults.standard.data(forKey: "quietHours").flatMap { try? JSONDecoder().decode(QuietHours.self, from: $0) } ?? QuietHours()
+  }() { didSet { UserDefaults.standard.set(try? JSONEncoder().encode(quietHours), forKey: "quietHours") } }
+  @Published var independentMenuItems = UserDefaults.standard.bool(forKey: "independentMenuItems") {
+    didSet { UserDefaults.standard.set(independentMenuItems, forKey: "independentMenuItems") }
+  }
+  @Published var floatingDashboard = UserDefaults.standard.bool(forKey: "floatingDashboard") {
+    didSet { UserDefaults.standard.set(floatingDashboard, forKey: "floatingDashboard") }
+  }
+  private var ruleEngine = ObservationEngine()
+  private var insightEngine = ObservationEngine()
+  private let insightRules = AlertRule.defaults
   @Published var snapshot = Snapshot()
   @Published var selectedTab = MonitorTab.overview
   @Published var samples: [Sample] = []
@@ -23,7 +44,7 @@ final class MonitorStore: ObservableObject {
   }
   @Published var paused = false {
     didSet {
-      if oldValue != paused { queue.async { self.collector.resetBaselines() } }
+      if oldValue != paused { ruleEngine.reset(); insightEngine.reset(); insights = []; queue.async { self.collector.resetBaselines() } }
     }
   }
   @Published var selectedApp: AppStat?
@@ -83,9 +104,7 @@ final class MonitorStore: ObservableObject {
   private var history: HistoryStore?
   private var timer: Timer?
   private var inFlight = false
-  private var triggerTimes: [String: Date] = [:]
   private var lastAlert: [String: Date] = [:]
-  private var memoryBaseline: [String: (Date, Double)] = [:]
   private var count = 0
   private var subscriptions = Set<AnyCancellable>()
   var visibleTabs: [MonitorTab] { tabOrder.filter { !hiddenTabs.contains($0) } }
@@ -271,38 +290,20 @@ final class MonitorStore: ObservableObject {
     }
   }
   private func checkAlerts(_ s: Snapshot) {
-    for a in s.apps where !a.isSystem {
-      let key = a.id + ":cpu"
-      if a.cpu > Double(s.cores) * 0.7 * 100 {
-        if triggerTimes[key] == nil { triggerTimes[key] = s.date }
-        if s.date.timeIntervalSince(triggerTimes[key]!) > 60 {
-          alert(
-            key, title: "\(a.name) is keeping the CPU busy",
-            detail: "Using \(Format.percent(a.cpu/Double(s.cores))) of your Mac for over a minute.")
-        }
-      } else {
-        triggerTimes[key] = nil
-      }
-      if a.write > 100_000_000 {
-        alert(
-          a.id + ":disk", title: "\(a.name) is writing heavily",
-          detail: Format.rate(a.write) + " to disk.")
-      }
-      if a.download + a.upload > 50_000_000 {
-        alert(
-          a.id + ":network", title: "\(a.name) is moving a lot of data",
-          detail: Format.rate(a.download + a.upload) + " of network traffic.")
-      }
-      if let baseline = memoryBaseline[a.id], s.date.timeIntervalSince(baseline.0) >= 600 {
-        if a.memory - baseline.1 > 1_000_000_000 {
-          alert(
-            a.id + ":memory", title: "\(a.name) keeps using more memory",
-            detail: "Up \(Format.memory(a.memory-baseline.1)) in ten minutes.")
-        }
-        memoryBaseline[a.id] = (s.date, a.memory)
-      } else if memoryBaseline[a.id] == nil {
-        memoryBaseline[a.id] = (s.date, a.memory)
-      }
+    let observation = ResourceObservation(date: s.date, duration: s.observedDuration, cpu: s.cpu,
+      diskFree: s.diskTotal > 0 ? s.diskFree : nil,
+      pressure: s.pressure == "Normal" ? 0 : ["Warning", "Elevated"].contains(s.pressure) ? 1 : s.pressure == "Critical" ? 2 : nil,
+      swap: s.totalMemory > 0 ? s.swap : nil, temperature: s.cpuTemperature,
+      apps: s.apps.filter { !$0.isSystem }.map { app in
+        ResourceApp(id: app.id, name: app.name,
+          identity: app.processes.min(by: { $0.start < $1.start }).map { "\($0.pid):\($0.start)" } ?? app.id,
+          cpu: app.cpu / Double(max(1, s.cores)), memory: app.memory, write: app.write,
+          network: s.networkAvailable ? app.download + app.upload : .nan)
+      })
+    _ = insightEngine.observe(observation, rules: insightRules)
+    insights = insightEngine.findings
+    for finding in ruleEngine.observe(observation, rules: alertRules) {
+      alert(finding.id, title: finding.title, detail: finding.detail)
     }
   }
   private func alert(_ key: String, title: String, detail: String) {
@@ -310,7 +311,7 @@ final class MonitorStore: ObservableObject {
     lastAlert[key] = Date()
     alerts.insert(MonitorAlert(title: title, detail: detail), at: 0)
     if alerts.count > 100 { alerts.removeLast() }
-    if notifications {
+    if notifications && !quietHours.contains(Date()) {
       let content = UNMutableNotificationContent()
       content.title = title
       content.body = detail

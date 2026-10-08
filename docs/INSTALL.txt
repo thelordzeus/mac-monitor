@@ -1,4 +1,4 @@
-Mac Pulse 1.4.0
+Mac Pulse 1.5.0
 
 Requirements
 Apple Silicon Mac (M1 or later), macOS 14.2 or later.

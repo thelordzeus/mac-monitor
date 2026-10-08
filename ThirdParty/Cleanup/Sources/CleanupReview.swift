@@ -334,7 +334,7 @@ enum ReviewFileDeletion {
     }
   }
 
-  static func trash(_ request: ReviewDeleteRequest) throws {
+  static func trash(_ request: ReviewDeleteRequest) throws -> CleanupWin {
     try validateIdentity(request)
     guard canTrashPath(request.file.path) else { throw ReviewDeleteError.protected }
     let volume = try URL(fileURLWithPath: request.file.path)
@@ -346,26 +346,14 @@ enum ReviewFileDeletion {
     if result.status == 0 { throw ReviewDeleteError.busy([]) }
     guard result.status == 1, result.output.isEmpty else { throw ReviewDeleteError.unverified }
     try validateIdentity(request)
-    try FileManager.default.trashItem(
-      at: URL(fileURLWithPath: request.file.path), resultingItemURL: nil)
+    let before = CleanupVolume.read(request.file.path)
+    let receipt = try TrashRecovery.trash(request.file.path)
+    return CleanupWin(id: UUID().uuidString, date: .now, title: "Moved \(request.file.name) to Trash", paths: [request.file.path],
+      before: before, after: before.flatMap { CleanupVolume.read($0.path) }, bytes: request.file.bytes, recovery: receipt.map { [$0] })
   }
 
   static func delete(_ request: ReviewDeleteRequest) throws -> CleanupWin {
-    try validateIdentity(request)
-    let result = CleanupActivity.command(["-nP", "-Fpc", "--", request.file.path])
-    if result.status == 0 {
-      let apps = result.output.split(separator: "\n").filter { $0.hasPrefix("c") }
-        .map { String($0.dropFirst()) }
-      throw ReviewDeleteError.busy(Array(Set(apps)).sorted().prefix(3).map { $0 })
-    }
-    guard result.status == 1, result.output.isEmpty else { throw ReviewDeleteError.unverified }
-    try validateIdentity(request)
-    let before = CleanupVolume.read(request.file.path)
-    try FileManager.default.removeItem(atPath: request.file.path)
-    return CleanupWin(
-      id: UUID().uuidString, date: .now, title: "Deleted \(request.file.name)",
-      paths: [request.file.path],
-      before: before, after: before.flatMap { CleanupVolume.read($0.path) })
+    try trash(request)
   }
 }
 
@@ -697,8 +685,8 @@ final class CleanupOverviewModel: ObservableObject {
         files.removeAll { $0.path == file.path }
         deletionFailure = nil
         message =
-          win.measuredGain.map { "Deleted \(file.name) · \(ByteText.full($0)) measured gain" }
-          ?? "Deleted \(file.name) · disk measurement unavailable"
+          win.measuredGain.map { "Moved \(file.name) to Trash · \(ByteText.full($0)) measured gain" }
+          ?? "Moved \(file.name) to Trash · disk measurement unavailable"
       } catch {
         if let deletionError = error as? ReviewDeleteError, case .missing = deletionError {
           deletionFailure = nil

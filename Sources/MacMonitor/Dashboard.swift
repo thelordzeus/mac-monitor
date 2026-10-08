@@ -39,6 +39,9 @@ import SwiftUI
       case .sound: SoundView(store: store, exporting: exporting)
       case .bluetooth: BluetoothView(store: store)
       case .projects: ProjectsView(store: store)
+      case .insights: InsightsView(store: store)
+      case .storage: StorageGrowthView(model: store.storageTracking)
+      case .connectivity: ConnectivityView(store: store, model: store.connectivity)
       default: metricDetail
       }
     }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 20)
@@ -57,6 +60,14 @@ import SwiftUI
         }
       }
       Spacer(minLength: 12)
+      if !exporting {
+        Menu {
+          ForEach(store.visibleTabs) { tab in
+            Button(tab.rawValue, systemImage: tab.symbol) { store.selectedTab = tab; store.search = "" }
+          }
+        } label: { Image(systemName: "ellipsis").frame(width: 26, height: 26) }
+          .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("All tabs").padding(.trailing, 18)
+      }
     }.padding(.leading, 18).frame(height: 72)
   }
   private var tabButtons: some View {
