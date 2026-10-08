@@ -12,6 +12,8 @@ Runs locally, with no account, telemetry, cloud service or web server required. 
 
 See what is using your Mac's resources, with live readings, app rankings and local history. Click a card or tab to inspect the details.
 
+The top navigation adapts to the window width: full labels on wider windows, and compact icon tabs with the active tab's name on narrower windows. Hover over an icon to see its name, or use the **All tabs** menu. Tabs remain visible without horizontal scrolling or clipped labels.
+
 ![Mac Pulse monitoring dashboard with live system cards, history charts and memory breakdowns](artifacts/screenshots/overview.png)
 
 | Tab | What you can see or do |
@@ -255,6 +257,8 @@ The build and core statistics/history checks were validated on an Apple M4 Mac. 
 python3 scripts/verify-metrics.py
 "dist/Mac Pulse.app/Contents/MacOS/MacMonitor" --render artifacts/screenshots
 ```
+
+For layout checks, the renderer also accepts `--width` and `--height`, for example `--render /tmp/mac-pulse-small --width 1080 --height 890`. Sizes are limited to the app's minimum window size and a maximum of 4096 points.
 
 The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. The Swift tests also cover observation gaps/restarts, quiet hours, partial folder scans, storage-map proportions, network parsing, app-file fingerprints and restore conflicts. See [1.5.0 feature verification](docs/FEATURES-VERIFICATION.md) for the test results and native checks. `--render` produces the monitoring screenshots, Cleanup landing page and floating dashboard from real Mac readings; it does not inject simulated statistics.
 

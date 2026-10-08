@@ -47,46 +47,60 @@ import SwiftUI
     }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 20)
   }
   private var header: some View {
-    HStack(spacing: 0) {
+    HStack(spacing: 12) {
       WindowControls().frame(width: 88, alignment: .leading)
-      if exporting {
-        tabButtons
-      } else {
-        ScrollViewReader { proxy in
-          ScrollView(.horizontal, showsIndicators: false) {
-            tabButtons
-          }.fixedSize(horizontal: false, vertical: true)
-            .onChange(of: store.selectedTab) { _, tab in proxy.scrollTo(tab) }
-        }
-      }
-      Spacer(minLength: 12)
+      ViewThatFits(in: .horizontal) {
+        tabButtons(compact: false)
+        tabButtons(compact: true)
+        currentTabMenu
+      }.frame(maxWidth: .infinity, alignment: .leading)
       if !exporting {
         Menu {
           ForEach(store.visibleTabs) { tab in
-            Button(tab.rawValue, systemImage: tab.symbol) { store.selectedTab = tab; store.search = "" }
+            Button(tab.rawValue, systemImage: tab.symbol) { selectTab(tab) }
           }
         } label: { Image(systemName: "ellipsis").frame(width: 26, height: 26) }
-          .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("All tabs").padding(.trailing, 18)
+          .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+          .accessibilityLabel("All tabs").help("All tabs")
       }
-    }.padding(.leading, 18).frame(height: 72)
+    }.padding(.horizontal, 18).frame(height: 72)
   }
-  private var tabButtons: some View {
+  private func tabButtons(compact: Bool) -> some View {
     HStack(spacing: 2) {
       ForEach(store.visibleTabs) { tab in
-        Button {
-          store.selectedTab = tab
-          store.search = ""
-        } label: {
+        Button { selectTab(tab) } label: {
           HStack(spacing: 7) {
-            Image(systemName: tab.symbol).font(.system(size: 12))
-            Text(tab.rawValue).font(.system(size: 14, weight: .medium))
+            Image(systemName: tab.symbol).font(.system(size: compact ? 14 : 12))
+            if !compact || store.selectedTab == tab {
+              Text(tab.rawValue).font(.system(size: 14, weight: .medium))
+            }
           }
           .foregroundStyle(store.selectedTab == tab ? tab.color : Color.muted)
           .padding(.horizontal, 13).padding(.vertical, 10)
           .background(store.selectedTab == tab ? tab.color.opacity(0.16) : .clear, in: Capsule())
-        }.buttonStyle(.plain).help("Show \(tab.rawValue)").id(tab)
+        }.buttonStyle(.plain).accessibilityLabel(tab.rawValue).help("Show \(tab.rawValue)")
       }
-    }.padding(4).background(Color.surface, in: Capsule())
+    }.padding(4).background(Color.surface, in: Capsule()).fixedSize(horizontal: true, vertical: false)
+  }
+  private var currentTabMenu: some View {
+    Menu {
+      ForEach(store.visibleTabs) { tab in
+        Button(tab.rawValue, systemImage: tab.symbol) { selectTab(tab) }
+      }
+    } label: {
+      HStack(spacing: 7) {
+        Image(systemName: store.selectedTab.symbol)
+        Text(store.selectedTab.rawValue)
+        Image(systemName: "chevron.down").font(.system(size: 10))
+      }.font(.system(size: 14, weight: .medium)).foregroundStyle(store.selectedTab.color)
+        .padding(.horizontal, 17).padding(.vertical, 14)
+        .background(store.selectedTab.color.opacity(0.16), in: Capsule())
+    }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+      .accessibilityLabel("Choose tab, \(store.selectedTab.rawValue)").help("Choose a tab")
+  }
+  private func selectTab(_ tab: MonitorTab) {
+    store.selectedTab = tab
+    store.search = ""
   }
   private var footer: some View {
     HStack(spacing: 12) {

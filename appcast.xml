@@ -6,6 +6,26 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>Mac Pulse</title>
         <item>
+            <title>1.5.1</title>
+            <pubDate>Fri, 09 Oct 2026 01:09:35 +0530</pubDate>
+            <link>https://github.com/thelordzeus/mac-monitor/releases/tag/v1.5.1</link>
+            <sparkle:version>11</sparkle:version>
+            <sparkle:shortVersionString>1.5.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.2</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description sparkle:format="markdown"><![CDATA[# Mac Pulse 1.5.1
+
+- The top navigation now adapts to the window width. Wide windows show every tab label; narrower windows use compact icon tabs while keeping the selected tab's name visible.
+- All tabs remain accessible without cut-off labels or horizontal scrolling. Hover over a compact tab to see its name, or use the All tabs menu.
+- Custom tab order and hidden tabs are preserved. Exported dashboard images use the same adaptive navigation.
+
+The seven features introduced in 1.5.0 remain included. Existing settings, monitoring history and Cleanup state are retained.
+
+Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free ad hoc signing and is not Apple-notarized.
+]]></description>
+            <enclosure url="https://github.com/thelordzeus/mac-monitor/releases/download/v1.5.1/Mac-Pulse-arm64.zip" length="4593615" type="application/octet-stream" sparkle:edSignature="JiFf+7dgL/lpyL2CeAycwsuN8Pnx5i3YBrOT7ney8OIAZh0iBcATzfhURIsweyHRSCvmu80/VkToG/CkblySAA=="/>
+        </item>
+        <item>
             <title>1.5.0</title>
             <pubDate>Thu, 08 Oct 2026 20:49:32 +0530</pubDate>
             <link>https://github.com/thelordzeus/mac-monitor/releases/tag/v1.5.0</link>
@@ -54,6 +74,6 @@ Requires an Apple Silicon Mac running macOS 14.2 or newer. This build uses free 
     </channel>
 </rss>
 <!-- sparkle-signatures:
-edSignature: S1kDdp4RRGNfEgonbZqhQI3o52MM7QIRKpb0m/cxEdN8FszCACOZKdSaWa5tusRecP46kdGhlI3sav0YwqiSCw==
-length: 4685
+edSignature: oIFHjRso2e1FbAaVE2LM9U4Iz3fTAhPqoNtd2aLaPvzLaR+KtMmUCWSc+QRzYkpJYUcy736jg+5vJ4UdWudbCQ==
+length: 6238
 -->

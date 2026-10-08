@@ -89,6 +89,15 @@ if CommandLine.arguments.contains("--io-worker") {
 {
   try MainActor.assumeIsolated {
     let folder = URL(fileURLWithPath: CommandLine.arguments[index + 1], isDirectory: true)
+    func dimension(_ flag: String, default value: Double, minimum: Double) -> Double {
+      guard let position = CommandLine.arguments.firstIndex(of: flag),
+        position + 1 < CommandLine.arguments.count,
+        let requested = Double(CommandLine.arguments[position + 1]), requested.isFinite
+      else { return value }
+      return min(4096, max(minimum, requested))
+    }
+    let width = dimension("--width", default: 1260, minimum: 1080)
+    let height = dimension("--height", default: 890, minimum: 740)
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
     _ = NSApplication.shared
     let store = MonitorStore(start: false)
@@ -108,7 +117,7 @@ if CommandLine.arguments.contains("--io-worker") {
     for tab in MonitorTab.allCases {
       store.selectedTab = tab
       let view = DashboardView(store: store, exporting: true).environmentObject(store).frame(
-        width: 1260, height: 890)
+        width: width, height: height)
       let renderer = ImageRenderer(content: view)
       renderer.scale = 1.5
       renderer.colorMode = .nonLinear
