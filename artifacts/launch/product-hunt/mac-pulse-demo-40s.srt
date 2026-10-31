@@ -1,0 +1,22 @@
+1
+00:00:00,000 --> 00:00:07,000
+Mac Pulse: live system monitoring in a native Mac dashboard.
+
+2
+00:00:07,000 --> 00:00:14,000
+Inspect app rankings and recent CPU history.
+
+3
+00:00:14,000 --> 00:00:24,000
+Recognize app caches, select several and review before removal.
+No files were removed in this demo.
+
+4
+00:00:24,000 --> 00:00:32,000
+See development runtimes, ports and observed CPU inactivity.
+No servers were stopped.
+
+5
+00:00:32,000 --> 00:00:40,000
+Free download and source: github.com/thelordzeus/mac-monitor
+Apple Silicon, macOS 14.2+. Installation instructions in the README.

@@ -252,6 +252,10 @@ For layout checks, the renderer also accepts `--width` and `--height`, for examp
 
 The self-test checks controlled CPU, 256 MiB memory, 8 MiB TCP and 8 MiB disk workloads, PID grouping, stale-PID protection, pause baselines, weighted history, pending totals, unknown readings, app ranking and formatting. The independent Python audit compares live readings with macOS counters and commands, saving a local report to `artifacts/metrics-audit.json` (excluded from Git). See [the verification findings](docs/VERIFICATION.md) for results and limitations. The Swift tests also cover observation gaps/restarts, quiet hours, partial folder scans, storage-map proportions, app-file fingerprints and restore conflicts. See [1.5.0 feature verification](docs/FEATURES-VERIFICATION.md) for the test results and native checks. `--render` produces the monitoring screenshots, Cleanup landing page and floating dashboard from real Mac readings; it does not inject simulated statistics.
 
+## Launch materials
+
+Product Hunt copy, gallery images, a 40-second captioned demo and the independent tester checklist are in the [launch pack](docs/launch/product-hunt.md). These materials describe the current release; independent tester feedback and the Product Hunt launch are still pending.
+
 ## Credits
 
 The monitoring interface is inspired by [Vitals](https://vitalsmac.com/). Mac Pulse is an independent implementation with its own name, icon and source code and is not affiliated with Vitals.

@@ -1,0 +1,17 @@
+{
+  "name": "Mac Pulse",
+  "tagline": "Monitor your Mac and reclaim storage in one native app",
+  "description": "Mac Pulse combines live CPU, memory, GPU, disk and network readings with storage browsing, cache review and development project controls. A free native macOS app with local history, menu-bar readouts and no account or app telemetry.",
+  "product_url": "https://github.com/thelordzeus/mac-monitor",
+  "download_url": "https://github.com/thelordzeus/mac-monitor/releases/latest/download/Mac-Pulse-arm64.dmg",
+  "pricing": "Free",
+  "suggested_topics": [
+    "Mac",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "maker_account": null,
+  "youtube_url": null,
+  "launch_date": null,
+  "status": "Prepared locally; personal Product Hunt signup and independent feedback pending"
+}
