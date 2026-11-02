@@ -11,8 +11,8 @@ Prepared on 31 October 2026 for the published **1.5.2 (build 12)** release.
 | Product URL | https://github.com/thelordzeus/mac-monitor |
 | Download URL | https://github.com/thelordzeus/mac-monitor/releases/latest/download/Mac-Pulse-arm64.dmg |
 | Pricing | Free ($0); no subscription |
-| Suggested topics | Mac, Productivity, Developer Tools; choose the closest available labels in the submission form |
-| Maker | Create your personal Product Hunt account, then add yourself as the maker |
+| Launch tags | Menu Bar Apps, Productivity, Developer Tools |
+| Maker | [Arnav Shukla, @arnav_shukla3](https://www.producthunt.com/@arnav_shukla3) |
 | Availability | Available now, Apple Silicon, macOS 14.2 or newer |
 
 The tagline is **54/60 characters**. Use this **232/260-character** description:
@@ -54,7 +54,7 @@ Use these files from [`artifacts/launch/product-hunt`](../../artifacts/launch/pr
 
 Gallery images are **1270×760**. The video is assembled from actual application captures with captions and transitions, not a continuous screen recording. Values and selections were not fabricated. No files were removed, no server was stopped, and the 2.9 GB selected size is not a measured space gain. The original captures are in `source/`; the monitoring and project images deliberately show cropped feature details.
 
-Product Hunt's video field currently accepts a **full YouTube URL**, not an uploaded MP4. Upload the video to your YouTube account as public or unlisted (not private), then paste that full URL into the draft. A YouTube upload has not been performed by this preparation.
+Product Hunt's live video field accepts a **YouTube or Loom link**, not an uploaded MP4 (checked 2 November 2026). If using YouTube, upload the video as public or unlisted (not private), then paste the full URL into the draft. No video upload has been performed.
 
 Suggested YouTube title:
 
@@ -66,18 +66,21 @@ Suggested YouTube description:
 
 ## Before scheduling
 
-You confirmed that you do not yet have a Product Hunt account. Open [Product Hunt](https://www.producthunt.com/), choose **Sign in**, and complete the personal-account signup using your preferred provider. Review and accept the platform's terms yourself. No account was created or social-account permissions accepted during this preparation. If posting is unavailable after signup, follow [Product Hunt's account eligibility instructions](https://help.producthunt.com/en/articles/481909-how-can-i-get-access-to-post).
+Google sign-in and personal onboarding are complete under **@arnav_shukla3**. On 2 November 2026, the submission was saved and verified in [My products & launches](https://www.producthunt.com/my/products?filter=drafts) as **In Progress (1)**, with **Scheduled (0)** and **Posted (0)**. Product Hunt distinguishes this saved in-progress submission from a finalized unscheduled draft.
 
-After signup, open the product submission flow, paste the listing fields above, add the thumbnail and at least two gallery images, select yourself as maker, and save a **draft**. Add the YouTube URL only after uploading the video. Keep the draft unscheduled until the independent feedback round is complete and you have chosen a day to answer comments.
+The name, tagline, description, GitHub product link, free pricing, three tags, maker role and first maker comment are saved. The logo is still missing; the gallery contains one automatically imported GitHub preview. File selection did not open in the in-app browser, and Product Hunt explicitly reported that URL uploads were unavailable there. Continue editing in a regular browser to add `thumbnail-240.png` and replace the preview with the prepared gallery images. These uploads are not claimed complete. Keep the submission unscheduled until independent feedback is complete and a launch day has been chosen.
 
 - [x] Copy, thumbnail, gallery images and captioned MP4 prepared.
 - [x] Published release and download metadata checked against 1.5.2.
 - [x] Compatibility, first-launch friction, unavailable sensors and cleanup limits disclosed.
-- [ ] Create your personal Product Hunt account and add yourself as maker.
+- [x] Create your personal Product Hunt account and add yourself as maker.
+- [x] Save the listing copy, free pricing, launch tags and first maker comment.
+- [ ] Upload the logo and prepared gallery images; the in-app browser upload controls are unavailable.
 - [ ] Upload the MP4 to your YouTube account if using the video field.
 - [ ] Collect feedback from 5–10 independent testers using [the tester guide](tester-guide.md).
 - [ ] Resolve any critical installation, incorrect-reading or removal-review issue found by testers.
-- [ ] Create/review the Product Hunt draft under your personal account.
+- [x] Save an in-progress Product Hunt submission under your personal account.
+- [ ] Complete the media fields and review the finalized draft.
 - [ ] Choose a date when you can answer questions, then schedule the launch.
 
 No launch date has been selected, no Product Hunt listing has been published and no independent tester results have been claimed.

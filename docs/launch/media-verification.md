@@ -27,9 +27,11 @@ Prepared on 31 October 2026 from Mac Pulse **1.5.2, build 12**, running on an Ap
 - The existing release executable's `--self-test` passed. The controlled CPU worker measured 82.2% of one core; the 256 MiB allocation measured a 258 MB footprint. Received TCP bytes, sent TCP bytes and disk writes each measured **8,388,608 bytes**, matching the controlled workload.
 - Existing limitations remain: the published app is ad hoc signed and not Apple-notarized; protected Trash access can require macOS permissions; per-app audio mixing, Intel builds and every sensor/device are not verified end to end.
 
-## External steps still pending
+## Product Hunt submission status — 2 November 2026
 
-The Product Hunt browser session was signed out, and the owner confirmed they do not have an account. No Product Hunt account, draft listing, scheduled launch, public listing or YouTube upload was created. Independent tester recruitment/results remain pending; [the tester guide](tester-guide.md) includes the invitation and feedback template. No external messages were sent.
+Google sign-in and personal onboarding completed under **@arnav_shukla3**, with the owner assigned as hunter and maker. The saved in-progress submission includes the name, tagline, description, GitHub product link, free pricing, Menu Bar Apps/Productivity/Developer Tools tags and the prepared first maker comment. **Save and exit** returned to My products & launches, showing **In Progress (1)**, **Drafts (0)**, **Scheduled (0)** and **Posted (0)**.
+
+The logo and prepared gallery uploads remain incomplete. File chooser attempts did not open a usable picker, and the logo URL control reported **“URL uploads are unavailable in this browser.”** The existing gallery is the automatically imported GitHub preview. No launch has been scheduled or published, no video has been uploaded and no independent tester results have been claimed. [The tester guide](tester-guide.md) includes the invitation and feedback template; no recruitment messages were sent.
 
 ## Reproduce the marketing exports
 
