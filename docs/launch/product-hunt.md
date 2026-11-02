@@ -1,6 +1,6 @@
 # Mac Pulse: Product Hunt launch pack
 
-Prepared on 31 October 2026 for the published **1.5.2 (build 12)** release.
+Prepared for the published **1.5.2 (build 12)** release. Gallery redesigned on **2 November 2026** using fresh native captures.
 
 ## Listing fields
 
@@ -46,13 +46,15 @@ Use these files from [`artifacts/launch/product-hunt`](../../artifacts/launch/pr
 | Thumbnail | `thumbnail-240.png` | Existing app icon, 240×240 PNG |
 | 1 | `01-monitoring.png` | Overview detail with real system readings |
 | 2 | `02-cache-review.png` | App cache icons, two selections, count/size and reviewed action |
-| 3 | `03-projects.png` | Real PostgreSQL process, port and observed inactivity |
-| Optional 4 | `04-app-usage.png` | Per-app CPU rankings and recent history |
-| Optional 5 | `05-download.png` | Download destination and compatibility |
+| 3 | `03-app-usage.png` | Live CPU history, user/system breakdown and app rankings |
 | Video | `mac-pulse-demo-40s.mp4` | 40-second captioned walkthrough, H.264, 1280×720, no audio |
 | Captions | `mac-pulse-demo-40s.srt` | Optional YouTube captions |
 
-Gallery images are **1270×760**. The video is assembled from actual application captures with captions and transitions, not a continuous screen recording. Values and selections were not fabricated. No files were removed, no server was stopped, and the 2.9 GB selected size is not a measured space gain. The original captures are in `source/`; the monitoring and project images deliberately show cropped feature details.
+The three current gallery images are **2540×1520**, twice the recommended 1270×760 size with the same aspect ratio. The redesign uses larger headings, consistent branding, restrained accent glows and sharper real app captures. The cache image focuses on the inventory and selection footer; the third image replaces the mostly empty Projects view with CPU history and app rankings. Upload the files in the numbered order above. Copies are in `~/Downloads/Product Hunt`; older upload images were preserved in its `Previous images` subfolder.
+
+Fresh captures are in `source/2026-11-02/`. The gallery deliberately crops feature details; values, app names, checkboxes and readings were not altered. Temporary cache selections were cleared afterward. No files were removed or processes stopped. The 2.9 GB selected size is not a measured space gain.
+
+The existing 40-second video remains the earlier captioned walkthrough assembled from the 31 October captures in `source/`; it is not a continuous screen recording. The older `03-projects.png`, `04-app-usage.png` and `05-download.png` stills are retained for that earlier pack and are not part of the current recommended upload set.
 
 Product Hunt's live video field accepts a **YouTube or Loom link**, not an uploaded MP4 (checked 2 November 2026). If using YouTube, upload the video as public or unlisted (not private), then paste the full URL into the draft. No video upload has been performed.
 

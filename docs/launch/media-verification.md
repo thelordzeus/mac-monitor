@@ -10,7 +10,16 @@ Prepared on 31 October 2026 from Mac Pulse **1.5.2, build 12**, running on an Ap
 - The video is a captioned sequence of these real captures, with transitions and a progress line. It is explicitly described as a walkthrough assembled from captures, not a continuous recording. The 2.9 GB selected size is not claimed as reclaimed space.
 - The existing app icon supplies the thumbnail. The caption, compatibility and first-launch text are code-rendered with AppKit. No third-party music, generated interface or invented testimonial is included.
 
-## Asset checks
+## Refreshed gallery — 2 November 2026
+
+- `01-monitoring.png`, `02-cache-review.png` and `03-app-usage.png` are now **2540×1520 PNGs**, with the same 1270:760 aspect ratio. The original product icon remains the 240×240 thumbnail.
+- Fresh Overview, cache Inventory and CPU captures were taken through the native app UI and normalized to PNG under `source/2026-11-02/` (3162×1586 pixels each). Dashboard and CPU charts had 60 actual samples. The cache scan completed, and Arc plus JetBrains were selected for the 2.9 GB review example. The selection and search were then cleared, and the app returned to Overview. No removal action was executed.
+- Each still uses one unmodified rectangular crop of its corresponding capture. No numbers, app names, icons, charts or selection states were fabricated or rearranged. The cache crop includes the complete selection footer and Trash-review button.
+- All three final exports were visually inspected for readable branding, upright UI, complete controls and clipping. The generator asserts source dimensions and checks that each caption fits its allotted width. The PNGs retain 2× detail.
+- Reproduce these stills with `scripts/prepare-product-hunt-gallery.swift` as shown below. The existing video and older optional stills were not regenerated; their original capture record and checks remain below.
+- Copies of the current three gallery images and thumbnail are supplied in `~/Downloads/Product Hunt`. Superseded upload files are preserved under `Previous images`.
+
+## Original video and optional-still checks
 
 - Five gallery images: **1270×760 PNG** each.
 - Thumbnail: **240×240 PNG**.
@@ -36,6 +45,15 @@ The logo and prepared gallery uploads remain incomplete. File chooser attempts d
 ## Reproduce the marketing exports
 
 From the repository root on a Mac with full Xcode:
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun swift \
+  scripts/prepare-product-hunt-gallery.swift \
+  artifacts/launch/product-hunt/source/2026-11-02 \
+  /private/tmp/mac-pulse-gallery-regenerated
+```
+
+For the original 31 October video and earlier stills, use a separate output directory:
 
 ```sh
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun swift \

@@ -11,6 +11,13 @@
     "Developer Tools"
   ],
   "maker_account": "@arnav_shukla3",
+  "thumbnail": "thumbnail-240.png",
+  "gallery": [
+    "01-monitoring.png",
+    "02-cache-review.png",
+    "03-app-usage.png"
+  ],
+  "gallery_updated": "2026-11-02",
   "youtube_url": null,
   "launch_date": null,
   "status": "Saved in Product Hunt as In Progress; copy, pricing, tags and maker comment complete; logo/gallery uploads, independent feedback and launch date pending"
